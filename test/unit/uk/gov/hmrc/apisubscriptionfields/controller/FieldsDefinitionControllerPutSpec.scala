@@ -29,12 +29,12 @@ import util.FieldsDefinitionTestData
 
 import scala.concurrent.Future
 
-class FieldsDefinitionControllerSpec extends UnitSpec with FieldsDefinitionTestData with MockFactory with JsonFormatters {
+class FieldsDefinitionControllerPutSpec extends UnitSpec with FieldsDefinitionTestData with MockFactory with JsonFormatters {
 
   private val mockFieldsDefinitionService = mock[FieldsDefinitionService]
   private val controller = new FieldsDefinitionController(mockFieldsDefinitionService)
 
-  "GET /definition/context/:apiContext/version/:apiVersion" should {
+  "PUT /definition/context/:apiContext/version/:apiVersion" should {
     "return CREATED when created in the repo" in {
       (mockFieldsDefinitionService.upsert _).expects(FakeFieldsDefinitionIdentifier, FakeFieldsDefinitions).returns(Future.successful(true))
 
