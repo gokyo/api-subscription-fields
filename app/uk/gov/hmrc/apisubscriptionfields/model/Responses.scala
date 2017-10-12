@@ -19,7 +19,6 @@ package uk.gov.hmrc.apisubscriptionfields.model
 import play.api.libs.json.Json.JsValueWrapper
 import play.api.libs.json.{JsObject, Json}
 
-case class SubscriptionFieldsIdResponse(fieldsId: SubscriptionFieldsId)
 case class SubscriptionFieldsResponse(id: String, fieldsId: SubscriptionFieldsId, fields: Fields)
 
 case class FieldsDefinitionResponse(fields: Seq[FieldDefinition])

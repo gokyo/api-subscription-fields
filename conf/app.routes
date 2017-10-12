@@ -1,5 +1,8 @@
 # microservice specific routes
 
+# TODO add definition get
+PUT         /definition/context/:apiContext/version/:apiVersion                @uk.gov.hmrc.apisubscriptionfields.controller.FieldsDefinitionController.upsertFieldsDefinition(apiContext: String, apiVersion: String)
+
 GET         /application/:appId/context/:apiContext/version/:apiVersion        @uk.gov.hmrc.apisubscriptionfields.controller.ApiSubscriptionFieldsController.getSubscriptionFields(appId: String, apiContext: String, apiVersion: String)
 
 GET         /fieldsId/:fieldsId                                                @uk.gov.hmrc.apisubscriptionfields.controller.ApiSubscriptionFieldsController.getSubscriptionFieldsByFieldsId(fieldsId: java.util.UUID)
