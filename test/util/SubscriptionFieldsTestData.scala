@@ -48,7 +48,7 @@ trait SubscriptionFieldsTestData extends TestData {
 
   final val FakeApiSubscription = SubscriptionFields(FakeRawIdentifier, FakeRawFieldsId, CustomFields)
   final val FakeSubscriptionFieldsId = SubscriptionFieldsId(FakeRawFieldsId)
-  final val ValidResponse: SubscriptionFieldsResponse = SubscriptionFieldsResponse(FakeSubscriptionFieldsId, CustomFields)
+  final val ValidResponse: SubscriptionFieldsResponse = SubscriptionFieldsResponse(FakeRawIdentifier, FakeSubscriptionFieldsId, CustomFields)
 
 }
 

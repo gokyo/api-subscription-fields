@@ -20,7 +20,7 @@ import play.api.libs.json.Json.JsValueWrapper
 import play.api.libs.json.{JsObject, Json}
 
 case class SubscriptionFieldsIdResponse(fieldsId: SubscriptionFieldsId)
-case class SubscriptionFieldsResponse(fieldsId: SubscriptionFieldsId, fields: Fields)
+case class SubscriptionFieldsResponse(id: String, fieldsId: SubscriptionFieldsId, fields: Fields)
 
 case class FieldsDefinitionResponse(fields: Seq[FieldDefinition])
 

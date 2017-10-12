@@ -24,14 +24,14 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
   import play.api.libs.json._
 
   private val fakeFields = Map( "f1" -> "v1" )
-  private val subscriptionFieldsResponse = SubscriptionFieldsResponse(FakeFieldsId, fakeFields)
+  private val subscriptionFieldsResponse = SubscriptionFieldsResponse(FakeRawIdentifier, FakeFieldsId, fakeFields)
 
   private val fakeFieldsDefinitionResponse = FieldsDefinitionResponse(Seq(FakeFieldDefinitionUrl))
 
   private def objectAsJsonString[A](a:A)(implicit t: Writes[A]) = Json.asciiStringify(Json.toJson(a))
 
   "SubscriptionFieldsResponse" should {
-    val json = s"""{"fieldsId":"$FakeRawFieldsId","fields":{"f1":"v1"}}"""
+    val json = s"""{"id":"$FakeRawIdentifier","fieldsId":"$FakeRawFieldsId","fields":{"f1":"v1"}}"""
 
     "marshal json" in {
       objectAsJsonString(subscriptionFieldsResponse) shouldBe json

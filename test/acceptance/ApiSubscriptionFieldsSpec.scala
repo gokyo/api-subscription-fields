@@ -108,7 +108,7 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
       val sfr = contentAsJson(resultFuture).validate[SubscriptionFieldsResponse]
 
       sfr.isSuccess shouldBe true
-      sfr.get should matchPattern { case SubscriptionFieldsResponse(_, SampleFields1) => }
+      sfr.get should matchPattern { case SubscriptionFieldsResponse(FakeRawIdentifier, _, SampleFields1) => }
 
     }
 
@@ -129,7 +129,7 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
       val sfr = contentAsJson(resultFuture).validate[SubscriptionFieldsResponse]
 
       sfr.isSuccess shouldBe true
-      sfr.get should matchPattern { case SubscriptionFieldsResponse(_, SampleFields2) => }
+      sfr.get should matchPattern { case SubscriptionFieldsResponse(FakeRawIdentifier, _, SampleFields2) => }
 
     }
 
