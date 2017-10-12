@@ -22,6 +22,7 @@ import play.api.libs.json.{JsObject, Json}
 case class SubscriptionFieldsIdResponse(fieldsId: SubscriptionFieldsId)
 case class SubscriptionFieldsResponse(fieldsId: SubscriptionFieldsId, fields: Fields)
 
+case class FieldsDefinitionResponse(fields: Seq[FieldDefinition])
 
 object ErrorCode extends Enumeration {
   type ErrorCode = Value
@@ -29,7 +30,6 @@ object ErrorCode extends Enumeration {
   val INVALID_REQUEST_PAYLOAD = Value("INVALID_REQUEST_PAYLOAD")
   val UNKNOWN_ERROR = Value("UNKNOWN_ERROR")
   val SUBSCRIPTION_FIELDS_ID_NOT_FOUND = Value("SUBSCRIPTION_FIELDS_ID_NOT_FOUND")
-
 }
 
 object JsErrorResponse {

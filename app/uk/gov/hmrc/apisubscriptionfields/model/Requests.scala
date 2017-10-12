@@ -18,3 +18,4 @@ package uk.gov.hmrc.apisubscriptionfields.model
 
 case class SubscriptionFieldsRequest(fields: Fields)
 
+case class FieldsDefinitionRequest(fields: Seq[FieldDefinition])

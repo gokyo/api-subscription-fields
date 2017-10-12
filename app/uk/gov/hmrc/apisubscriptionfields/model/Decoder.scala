@@ -14,13 +14,27 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.apisubscriptionfields
+package uk.gov.hmrc.apisubscriptionfields.model
 
-package object model {
+trait Decoder[T] {
+  val separator: SeparatorType
+  val numOfParts: Int
+  protected def decode(tokens: Seq[String]): T
 
-  type Fields = Map[String, String]
+  def decode(text:String): Option[T] = {
+    def findSeparator(separatorToFind: SeparatorType) : SeparatorType = {
+      if (text.split(separatorToFind).length > numOfParts)
+        findSeparator(separatorToFind+separator)
+      else
+        separatorToFind
+    }
 
-  type SeparatorType = String
-  val Separator: SeparatorType = "##"
+    val parts = text.split(findSeparator(separator)).toSeq
+
+    if (parts.size == numOfParts)
+      Some(decode(parts))
+    else
+      None
+  }
 
 }

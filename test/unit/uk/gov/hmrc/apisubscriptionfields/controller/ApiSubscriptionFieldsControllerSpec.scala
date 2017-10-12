@@ -25,11 +25,11 @@ import uk.gov.hmrc.apisubscriptionfields.controller.ApiSubscriptionFieldsControl
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.service.SubscriptionFieldsService
 import uk.gov.hmrc.play.test.UnitSpec
-import util.TestData
+import util.SubscriptionFieldsTestData
 
 import scala.concurrent.Future
 
-class ApiSubscriptionFieldsControllerSpec extends UnitSpec with TestData with MockFactory {
+class ApiSubscriptionFieldsControllerSpec extends UnitSpec with SubscriptionFieldsTestData with MockFactory {
 
   private val mockSubscriptionFieldsService = mock[SubscriptionFieldsService]
   private val controller = new ApiSubscriptionFieldsController(mockSubscriptionFieldsService)
