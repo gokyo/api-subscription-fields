@@ -30,24 +30,22 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
+
 trait AcceptanceTestSpec extends FeatureSpec
   with GivenWhenThen
   with BeforeAndAfterAll
   with Matchers
   with GuiceOneAppPerSuite {
 
-  protected val ValidGetRequest = FakeRequest()
+  protected val ValidRequest = FakeRequest()
     .withHeaders(RequestHeaders.ACCEPT_HMRC_JSON_HEADER)
 
-  protected val ValidDeleteRequest = FakeRequest()
-    .withHeaders(RequestHeaders.ACCEPT_HMRC_JSON_HEADER)
-
-  def idEndpoint(appId: String, apiContext: String, apiVersion: String) =
+  protected def idEndpoint(appId: String, apiContext: String, apiVersion: String) =
     s"/application/$appId/context/$apiContext/version/$apiVersion"
 
-  def definitionEndpoint(apiContext: String, apiVersion: String) = s"/definition/context/$apiContext/version/$apiVersion"
+  protected def definitionEndpoint(apiContext: String, apiVersion: String) = s"/definition/context/$apiContext/version/$apiVersion"
 
-  def fieldsIdEndpoint(fieldsId: UUID) = s"/fieldsId/$fieldsId"
+  protected def fieldsIdEndpoint(fieldsId: UUID) = s"/fieldsId/$fieldsId"
 
   override def fakeApplication(): Application = new GuiceApplicationBuilder().configure(Map(
     "run.mode" -> "Stub",

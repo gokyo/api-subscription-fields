@@ -18,6 +18,7 @@ package acceptance
 
 import org.scalatest.OptionValues
 import play.api.Logger
+import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -31,25 +32,24 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
   with SubscriptionFieldsTestData
   with FieldsDefinitionTestData {
 
-  import play.api.libs.json._
   import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters._
 
-  val SampleFields1 = Map("field1" -> "value1", "field2" -> "value2")
-  val SampleFields2 = Map("field1" -> "value1b", "field3" -> "value3")
+  private val SampleFields1 = Map("field1" -> "value1", "field2" -> "value2")
+  private val SampleFields2 = Map("field1" -> "value1b", "field3" -> "value3")
 
-  def validSubscriptionPutRequest(fields: Fields): FakeRequest[AnyContentAsJson] =
+  private def validSubscriptionPutRequest(fields: Fields): FakeRequest[AnyContentAsJson] =
     validSubscriptionPutRequest(SubscriptionFieldsRequest(fields))
 
-  def validSubscriptionPutRequest(contents: SubscriptionFieldsRequest): FakeRequest[AnyContentAsJson] =
+  private def validSubscriptionPutRequest(contents: SubscriptionFieldsRequest): FakeRequest[AnyContentAsJson] =
     fakeRequestWithHeaders.withJsonBody(Json.toJson(contents))
 
-  def validDefinitionPutRequest(fieldDefinitions: Seq[FieldDefinition]): FakeRequest[AnyContentAsJson] =
+  private def validDefinitionPutRequest(fieldDefinitions: Seq[FieldDefinition]): FakeRequest[AnyContentAsJson] =
     validDefinitionPutRequest(FieldsDefinitionRequest(fieldDefinitions))
 
-  def validDefinitionPutRequest(contents: FieldsDefinitionRequest): FakeRequest[AnyContentAsJson] =
+  private def validDefinitionPutRequest(contents: FieldsDefinitionRequest): FakeRequest[AnyContentAsJson] =
     fakeRequestWithHeaders.withJsonBody(Json.toJson(contents))
 
-  def fakeRequestWithHeaders: FakeRequest[AnyContentAsEmpty.type] = {
+  private def fakeRequestWithHeaders: FakeRequest[AnyContentAsEmpty.type] = {
     FakeRequest().withHeaders(RequestHeaders.ACCEPT_HMRC_JSON_HEADER, RequestHeaders.CONTENT_TYPE_HEADER)
   }
 
@@ -80,7 +80,7 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
     scenario("the API is called to GET with a known subscription identifier") {
 
       Given("a request with a known identifier")
-      val request = ValidGetRequest.copyFakeRequest(method = GET, uri = idEndpoint(fakeAppId, fakeContext, fakeVersion))
+      val request = ValidRequest.copyFakeRequest(method = GET, uri = idEndpoint(fakeAppId, fakeContext, fakeVersion))
 
       When("a GET request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -101,7 +101,7 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
     scenario("the API is called to GET with a known fields identifier") {
 
       Given("a request with a known identifier")
-      val requestId = ValidGetRequest.copyFakeRequest(method = GET, uri = idEndpoint(fakeAppId, fakeContext, fakeVersion))
+      val requestId = ValidRequest.copyFakeRequest(method = GET, uri = idEndpoint(fakeAppId, fakeContext, fakeVersion))
 
       When("an id GET request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, requestId)
@@ -117,7 +117,7 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
 
       Given("a request with a known fieldsId")
       val fieldsId = sfr.get.fieldsId
-      val requestFieldsId = ValidGetRequest.copyFakeRequest(method = GET, uri = fieldsIdEndpoint(fieldsId.value))
+      val requestFieldsId = ValidRequest.copyFakeRequest(method = GET, uri = fieldsIdEndpoint(fieldsId.value))
 
       When("a fieldsId GET request with data is sent to the API")
       val resultFieldsId: Option[Future[Result]] = route(app, requestFieldsId)
@@ -158,7 +158,7 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
     scenario("the API is called to DELETE a known subscription identifier") {
 
       Given("a request with a known identifier")
-      val request = ValidDeleteRequest.copyFakeRequest(method = DELETE, uri = idEndpoint(fakeAppId, fakeContext, fakeVersion))
+      val request = ValidRequest.copyFakeRequest(method = DELETE, uri = idEndpoint(fakeAppId, fakeContext, fakeVersion))
 
       When("a GET request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -194,7 +194,7 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
     scenario("the API is called to GET a known fields definition") {
 
       Given("a request with a known identifier")
-      val request = ValidGetRequest.copyFakeRequest(method = GET, uri = definitionEndpoint(fakeContext, fakeVersion))
+      val request = ValidRequest.copyFakeRequest(method = GET, uri = definitionEndpoint(fakeContext, fakeVersion))
 
       When("a GET request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)

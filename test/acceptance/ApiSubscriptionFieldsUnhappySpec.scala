@@ -18,9 +18,10 @@ package acceptance
 
 import org.scalatest.OptionValues
 import play.api.Logger
+import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.test.Helpers._
-import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode.{FIELDS_DEFINITION_ID_NOT_FOUND, SUBSCRIPTION_FIELDS_ID_NOT_FOUND}
+import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode.{FIELDS_DEFINITION_ID_NOT_FOUND, INVALID_REQUEST_PAYLOAD, SUBSCRIPTION_FIELDS_ID_NOT_FOUND}
 import uk.gov.hmrc.apisubscriptionfields.model.JsErrorResponse
 import util.SubscriptionFieldsTestData
 
@@ -30,32 +31,13 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
   with OptionValues
   with SubscriptionFieldsTestData {
 
-
   feature("Subscription-Fields") {
     Logger.logger.info(s"App.mode = ${app.mode.toString}")
 
     scenario("the API is called to GET an unknown subscription identifier") {
 
-      Given("ValidGetRequest.copyFakeRequest(method = GET, uri = endpoint(fakeAppId, fakeContext, fakeVersion))a request with an unknown identifier")
-      val request = ValidGetRequest.copyFakeRequest(method = GET, uri = idEndpoint(fakeAppId, fakeContext, fakeVersion))
-
-      When("a GET request with data is sent to the API")
-      val result: Option[Future[Result]] = route(app, request)
-
-      Then(s"a response with a 404 status is received")
-      result shouldBe 'defined
-      val resultFuture = result.value
-
-      status(resultFuture) shouldBe NOT_FOUND
-
-      And("the response body is empty")
-      contentAsJson(resultFuture) shouldBe JsErrorResponse(SUBSCRIPTION_FIELDS_ID_NOT_FOUND, s"Subscription Fields were not found")
-    }
-
-    scenario("the API is called to DELETE an unknown subscription fields identifier") {
-
-      Given("a request with an unknown identifier")
-      val request = ValidDeleteRequest.copyFakeRequest(method = DELETE, uri = idEndpoint(fakeAppId, fakeContext, fakeVersion))
+      Given("the API is called to GET an unknown subscription identifier")
+      val request = ValidRequest.copyFakeRequest(method = GET, uri = idEndpoint(fakeAppId, fakeContext, fakeVersion))
 
       When("a GET request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -70,13 +52,10 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
       contentAsJson(resultFuture) shouldBe JsErrorResponse(SUBSCRIPTION_FIELDS_ID_NOT_FOUND, "Subscription Fields were not found")
     }
 
-  }
+    scenario("the API is called to GET with an unknown fields identifier") {
 
-  feature("Fields-Definition") {
-    scenario("the API is called to GET an unknown fields definition") {
-
-      Given("the API is called to GET an unknown fields definition")
-      val request = ValidGetRequest.copyFakeRequest(method = GET, uri = definitionEndpoint(fakeContext, "unknown"))
+      Given("the API is called to GET with an unknown fields identifier")
+      val request = ValidRequest.copyFakeRequest(method = GET, uri = fieldsIdEndpoint(FakeRawFieldsId))
 
       When("a GET request with data is sent to the API")
       val result: Option[Future[Result]] = route(app, request)
@@ -88,8 +67,81 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe NOT_FOUND
 
       And("the response body is empty")
+      contentAsJson(resultFuture) shouldBe JsErrorResponse(SUBSCRIPTION_FIELDS_ID_NOT_FOUND, "Subscription Fields were not found")
+    }
+
+    scenario("the API is called to DELETE an unknown subscription fields identifier") {
+
+      Given("a request with an unknown identifier")
+      val request = ValidRequest.copyFakeRequest(method = DELETE, uri = idEndpoint(fakeAppId, fakeContext, fakeVersion))
+
+      When("a GET request with data is sent to the API")
+      val result: Option[Future[Result]] = route(app, request)
+
+      Then(s"a response with a 404 status is received")
+      result shouldBe 'defined
+      val resultFuture = result.value
+
+      status(resultFuture) shouldBe NOT_FOUND
+
+      And("the response body is empty")
+      contentAsJson(resultFuture) shouldBe JsErrorResponse(SUBSCRIPTION_FIELDS_ID_NOT_FOUND, "Subscription Fields were not found")
+    }
+
+    scenario("the API is called to PUT subscription fields with an invalid payload") {
+
+      Given("the API is called to PUT subscription fields with an invalid payload")
+      val request = ValidRequest.copyFakeRequest(method = PUT, uri = idEndpoint(fakeAppId, fakeContext, fakeVersion), body = Json.parse("{}"))
+
+      When("a PUT request with data is sent to the API")
+      val result: Option[Future[Result]] = route(app, request)
+
+      Then(s"a response with a 422 status is received")
+      result shouldBe 'defined
+      val resultFuture = result.value
+
+      status(resultFuture) shouldBe UNPROCESSABLE_ENTITY
+
+      And("the response body contains error message")
+      contentAsJson(resultFuture) shouldBe JsErrorResponse(INVALID_REQUEST_PAYLOAD, _: Json.JsValueWrapper)
+    }
+  }
+
+  feature("Fields-Definition") {
+    scenario("the API is called to GET an unknown fields definition") {
+
+      Given("the API is called to GET an unknown fields definition")
+      val request = ValidRequest.copyFakeRequest(method = GET, uri = definitionEndpoint(fakeContext, "unknown"))
+
+      When("a GET request with data is sent to the API")
+      val result: Option[Future[Result]] = route(app, request)
+
+      Then(s"a response with a 404 status is received")
+      result shouldBe 'defined
+      val resultFuture = result.value
+
+      status(resultFuture) shouldBe NOT_FOUND
+
+      And("the response body contains error message")
       contentAsJson(resultFuture) shouldBe JsErrorResponse(FIELDS_DEFINITION_ID_NOT_FOUND, "Fields definition was not found")
     }
 
+    scenario("the API is called to PUT a fields definition with an invalid payload") {
+
+      Given("the API is called to PUT a fields definition with an invalid payload")
+      val request = ValidRequest.copyFakeRequest(method = PUT, uri = definitionEndpoint(fakeContext, fakeVersion), body = Json.parse("{}"))
+
+      When("a PUT request with data is sent to the API")
+      val result: Option[Future[Result]] = route(app, request)
+
+      Then(s"a response with a 422 status is received")
+      result shouldBe 'defined
+      val resultFuture = result.value
+
+      status(resultFuture) shouldBe UNPROCESSABLE_ENTITY
+
+      And("the response body contains error message")
+      contentAsJson(resultFuture) shouldBe JsErrorResponse(INVALID_REQUEST_PAYLOAD, _: Json.JsValueWrapper)
+    }
   }
 }
