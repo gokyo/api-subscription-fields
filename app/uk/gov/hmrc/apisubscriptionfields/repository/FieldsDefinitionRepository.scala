@@ -35,7 +35,12 @@ import scala.concurrent.Future
 @ImplementedBy(classOf[FieldsDefinitionMongoRepository])
 trait FieldsDefinitionRepository {
 
-  def save(fieldsDefinition: FieldsDefinition): Future[Boolean]
+  /**
+    * Saves or inserts entity depending on if it already exists.
+    * Returns Future of isInserted Boolean flag if everything went OK - otherwise a failed Future with an error message.
+    * @param fieldsDefinition entity to upsert
+    */
+  def upsert(fieldsDefinition: FieldsDefinition): Future[Boolean]
 
   def fetchById(id: String): Future[Option[FieldsDefinition]]
 }
@@ -71,8 +76,13 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
     collection.find(selector).one[FieldsDefinition]
   }
 
-  override def save(fieldsDefinition: FieldsDefinition): Future[Boolean] = {
-    val selector = Json.obj("id" -> fieldsDefinition.id)
+  /**
+    * Saves or inserts entity depending on if it already exists.
+    * Returns Future of isInserted Boolean flag if everything went OK - otherwise a failed Future with an error message.
+    * @param fieldsDefinition entity to upsert
+    */
+  override def upsert(fieldsDefinition: FieldsDefinition): Future[Boolean] = {
+    val selector = selectorById(fieldsDefinition.id)
     Logger.debug(s"[save] selector: $selector")
     collection.find(selector).one[BSONDocument].map {
       case Some(document) => (collection.update(selector = BSONDocument("_id" -> document.get("_id")), update = fieldsDefinition), false)
@@ -102,7 +112,6 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
       }
     }
   }
-
 
   private def selectorById(id: String) = Json.obj("id" -> id)
 

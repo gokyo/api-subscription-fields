@@ -68,7 +68,7 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
   "save" should {
     "insert the record in the collection" in new Setup {
       collectionSize shouldBe 0
-      await(repository.save(fieldsDefinition))
+      await(repository.upsert(fieldsDefinition))
       collectionSize shouldBe 1
 
       import reactivemongo.json._
@@ -80,7 +80,7 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
 
   "fetchById" should {
     "retrieve the correct record from the `id` " in new Setup {
-      await(repository.save(fieldsDefinition))
+      await(repository.upsert(fieldsDefinition))
       collectionSize shouldBe 1
 
       await(repository.fetchById(fieldsDefinition.id)) shouldBe Some(fieldsDefinition)
@@ -88,7 +88,7 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
 
     "return `None` when the `id` doesn't match any record in the collection" in {
       for (i <- 1 to 3) {
-        await(repository.save(createFieldsDefinition))
+        await(repository.upsert(createFieldsDefinition))
       }
       collectionSize shouldBe 3
 
@@ -99,10 +99,10 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
   "collection" should {
     "have a unique index on `id` " in new Setup {
 
-      await(repository.save(fieldsDefinition))
+      await(repository.upsert(fieldsDefinition))
       collectionSize shouldBe 1
 
-      await(repository.save(fieldsDefinition.copy(fields = Seq(FakeFieldDefinitionUrl))))
+      await(repository.upsert(fieldsDefinition.copy(fields = Seq(FakeFieldDefinitionUrl))))
       collectionSize shouldBe 1
     }
   }

@@ -47,8 +47,7 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
     }
 
     "return false if save is for an existing fields definition" in {
-      (mockFieldsDefinitionRepository fetchById _) expects FakeFieldsDefinitionIdentifier.encode() returns Some(FakeFieldsDefinition)
-      (mockFieldsDefinitionRepository save _) expects FakeFieldsDefinition returns false
+      (mockFieldsDefinitionRepository upsert _) expects FakeFieldsDefinition returns false
 
       val result = await(service.upsert(FakeFieldsDefinitionIdentifier, FakeFieldsDefinitions))
 
@@ -56,16 +55,15 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
     }
 
     "return true if save is for a new fields definition" in {
-      (mockFieldsDefinitionRepository fetchById _) expects FakeFieldsDefinitionIdentifier.encode() returns None
-      (mockFieldsDefinitionRepository save _) expects FakeFieldsDefinition returns true
+      (mockFieldsDefinitionRepository upsert _) expects FakeFieldsDefinition returns true
 
       val result = await(service.upsert(FakeFieldsDefinitionIdentifier, FakeFieldsDefinitions))
 
       result shouldBe true
     }
 
-    "propagate Failure in repository" in {
-      (mockFieldsDefinitionRepository fetchById _) expects FakeFieldsDefinitionIdentifier.encode() returns Future.failed(emulatedFailure)
+    "propagate Failure in repository for upsert" in {
+      (mockFieldsDefinitionRepository upsert _) expects * returns Future.failed(emulatedFailure)
 
       val caught = intercept[EmulatedFailure] {
         await(service.upsert(FakeFieldsDefinitionIdentifier, FakeFieldsDefinitions))
