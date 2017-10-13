@@ -16,12 +16,15 @@
 
 package uk.gov.hmrc.apisubscriptionfields.model
 
+import scala.annotation.tailrec
+
 trait Decoder[T] {
   val separator: SeparatorType
   val numOfParts: Int
   protected def decode(tokens: Seq[String]): T
 
   def decode(text:String): Option[T] = {
+    @tailrec
     def findSeparator(separatorToFind: SeparatorType) : SeparatorType = {
       if (text.split(separatorToFind).length > numOfParts)
         findSeparator(separatorToFind+separator)

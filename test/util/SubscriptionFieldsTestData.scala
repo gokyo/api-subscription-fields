@@ -29,14 +29,14 @@ trait TestData {
   final val unit = ()
   type EmulatedFailure = UnsupportedOperationException
   final val emulatedFailure = new EmulatedFailure("Emulated failure.")
+  final val fakeAppId = UUID.randomUUID().toString
+  final val fakeContext = "acontext"
+  final val fakeVersion = "1.0.2"
 }
 
 
 trait SubscriptionFieldsTestData extends TestData {
 
-  final val fakeAppId = UUID.randomUUID().toString
-  final val fakeContext = "acontext"
-  final val fakeVersion = "1.0.2"
   final val FakeSubscriptionIdentifier = SubscriptionIdentifier(AppId(fakeAppId),ApiContext(fakeContext),ApiVersion(fakeVersion))
   final val FakeRawIdentifier: String = FakeSubscriptionIdentifier.encode()
 
@@ -53,7 +53,7 @@ trait SubscriptionFieldsTestData extends TestData {
 }
 
 trait FieldsDefinitionTestData extends TestData {
-  final val FakeFieldsDefinitionIdentifier = FieldsDefinitionIdentifier(ApiContext("apiContext"), ApiVersion("apiVersion"))
+  final val FakeFieldsDefinitionIdentifier = FieldsDefinitionIdentifier(ApiContext(fakeContext), ApiVersion(fakeVersion))
   final val FakeFieldDefinitionUrl = FieldDefinition("name1", "desc1", FieldDefinitionType.URL)
   final val FakeFieldDefinitionString = FieldDefinition("name2", "desc2", FieldDefinitionType.STRING)
   final val FakeFieldDefinitionSecureToken = FieldDefinition("name3", "desc3", FieldDefinitionType.SECURE_TOKEN)

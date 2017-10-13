@@ -73,6 +73,7 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
       contentAsJson(resultFuture) shouldBe JsErrorResponse(SUBSCRIPTION_FIELDS_ID_NOT_FOUND, s"Subscription Fields were not found")
     }
 
+    //TODO add DELETE for known fields id
     scenario("the API is called to DELETE an unknown subscription fields identifier") {
 
       Given("a request with an unknown identifier")
