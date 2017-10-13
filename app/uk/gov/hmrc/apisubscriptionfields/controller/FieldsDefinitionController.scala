@@ -19,17 +19,20 @@ package uk.gov.hmrc.apisubscriptionfields.controller
 import javax.inject.{Inject, Singleton}
 
 import play.api.Logger
-import play.api.libs.json.JsValue
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.service.FieldsDefinitionService
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 @Singleton
 class FieldsDefinitionController @Inject() (service: FieldsDefinitionService) extends CommonController {
 
   import JsonFormatters._
+
+  private val NOT_FOUND_RESPONSE = NotFound(JsErrorResponse(ErrorCode.FIELDS_DEFINITION_ID_NOT_FOUND, "Fields definition was not found"))
 
   def upsertFieldsDefinition(rawApiContext: String, rawApiVersion: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[FieldsDefinitionRequest] { payload =>
@@ -43,5 +46,17 @@ class FieldsDefinitionController @Inject() (service: FieldsDefinitionService) ex
     } recover recovery
   }
 
+  def getFieldsDefinition(rawApiContext: String, rawApiVersion: String): Action[AnyContent] = Action.async { implicit request =>
+    Logger.debug(s"[getFieldsDefinition] apiContext: $rawApiContext apiVersion: $rawApiVersion")
+    val eventualMaybeResponse = service.get(FieldsDefinitionIdentifier(ApiContext(rawApiContext), ApiVersion(rawApiVersion)))
+    asActionResult(eventualMaybeResponse)
+  }
+
+  private def asActionResult(eventualMaybeResponse: Future[Option[FieldsDefinitionResponse]]) = {
+    eventualMaybeResponse map {
+      case Some(subscriptionFields) => Ok(Json.toJson(subscriptionFields))
+      case None => NOT_FOUND_RESPONSE
+    } recover recovery
+  }
 }
 

@@ -65,7 +65,7 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
     val fieldsDefinition = createFieldsDefinition
   }
 
-  "save" should {
+  "upsert" should {
     "insert the record in the collection" in new Setup {
       collectionSize shouldBe 0
       await(repository.upsert(fieldsDefinition))
@@ -75,6 +75,19 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
 
       val selector = BSONDocument("id" -> fieldsDefinition.id)
       await(repository.collection.find(selector).one[FieldsDefinition]) shouldBe Some(fieldsDefinition)
+    }
+
+    "update the record in the collection" in new Setup {
+      import reactivemongo.json._
+      collectionSize shouldBe 0
+      await(repository.upsert(fieldsDefinition))
+      collectionSize shouldBe 1
+      val edited = fieldsDefinition.copy(fields = Seq.empty)
+
+      await(repository.upsert(edited))
+
+      val selector = BSONDocument("id" -> fieldsDefinition.id)
+      await(repository.collection.find(selector).one[FieldsDefinition]) shouldBe Some(edited)
     }
   }
 

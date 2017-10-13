@@ -9,10 +9,8 @@ This microservice stores and retrieves subscription fields and their values.
 #### Add or modify fields definition record
 curl -v -X PUT -H "Content-Type: application/json"  -H "Cache-Control: no-cache" -d '{ "fields": [ { "name": "callback-url", "description": "Callback URL", "type": "URL" }, { "name": "token", "description": "Secure Token", "type": "SecureToken" } ] }' "http://localhost:9000/definition/context/ciao-api/version/1.0"
 
-
 #### Get fields definition by api context and api version
-
-
+curl -v -X GET -H "Content-Type: application/json"  -H "Cache-Control: no-cache" "http://localhost:9000/definition/context/ciao-api/version/1.0"
 
 
 ### Subscription Fields Endpoint examples
