@@ -48,7 +48,7 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
 
     "return false if save is for an existing fields definition" in {
       (mockFieldsDefinitionRepository fetchById _) expects FakeFieldsDefinitionIdentifier.encode() returns Some(FakeFieldsDefinition)
-      (mockFieldsDefinitionRepository save _) expects FakeFieldsDefinition returns unit
+      (mockFieldsDefinitionRepository save _) expects FakeFieldsDefinition returns false
 
       val result = await(service.upsert(FakeFieldsDefinitionIdentifier, FakeFieldsDefinitions))
 
@@ -57,7 +57,7 @@ class FieldsDefinitionServiceSpec extends UnitSpec with FieldsDefinitionTestData
 
     "return true if save is for a new fields definition" in {
       (mockFieldsDefinitionRepository fetchById _) expects FakeFieldsDefinitionIdentifier.encode() returns None
-      (mockFieldsDefinitionRepository save _) expects FakeFieldsDefinition returns unit
+      (mockFieldsDefinitionRepository save _) expects FakeFieldsDefinition returns true
 
       val result = await(service.upsert(FakeFieldsDefinitionIdentifier, FakeFieldsDefinitions))
 
