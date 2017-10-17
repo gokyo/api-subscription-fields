@@ -86,6 +86,20 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
     }
   }
 
+  "fetchByApplicationId" should {
+    "retrieve the correct record from the `id` " in {
+      val customFields = Map("field_1" -> "value_1", "field_2" -> "value_2", "field_3" -> "value_3")
+      val apiSubscription = SubscriptionFields(FakeSubscriptionIdentifier.encode, UUID.randomUUID(), customFields)
+      val isInserted = await(repository.upsert(apiSubscription))
+      collectionSize shouldBe 1
+      isInserted shouldBe true
+
+      await(repository.fetchByApplicationId(FakeSubscriptionIdentifier.applicationId.value)) shouldBe None
+    }
+
+  }
+
+
   "fetchById" should {
     "retrieve the correct record from the `id` " in {
       val apiSubscription = createApiSubscription()

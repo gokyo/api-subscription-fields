@@ -19,7 +19,43 @@ package uk.gov.hmrc.apisubscriptionfields.model
 import play.api.libs.json.Json.JsValueWrapper
 import play.api.libs.json.{JsObject, Json}
 
+/*
+
+{
+  "id" : "[application-id]___[api-context]___[api-version]",
+  "fieldsId" : "GENERATED_UUID",
+   "fields": {
+  "callback-id": "http://localhost",
+  "token": "abc123"
+ }
+}
+
+{
+  "fields": [
+    {
+      "id": "[application-id]___[api-context]___[api-version]",
+      "fieldsId": "GENERATED_UUID",
+      "fields": {
+        "callback-id": "http://localhost",
+        "token": "abc123"
+      }
+    },
+    {
+      "id": "[application-id]___[api-context]___[api-version2]",
+      "fieldsId": "GENERATED_UUID",
+      "fields": {
+        "callback-id": "https://application.sage.com/return-route",
+        "token": "zyx456"
+      }
+    }
+  ]
+}
+
+*/
+
 case class SubscriptionFieldsResponse(id: String, fieldsId: SubscriptionFieldsId, fields: Fields)
+
+case class BulkSubscriptionFieldsResponse(fields: Seq[SubscriptionFieldsResponse])
 
 case class FieldsDefinitionResponse(fields: Seq[FieldDefinition])
 

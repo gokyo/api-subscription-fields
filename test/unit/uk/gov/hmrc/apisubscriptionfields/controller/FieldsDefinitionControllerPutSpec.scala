@@ -55,7 +55,7 @@ class FieldsDefinitionControllerPutSpec extends UnitSpec with FieldsDefinitionTe
   }
 
   private def testSubmitResult(request: Request[JsValue])(test: Future[Result] => Unit) {
-    val action: Action[JsValue] = controller.upsertFieldsDefinition(fakeContext, fakeVersion)
+    val action: Action[JsValue] = controller.upsertFieldsDefinition(fakeRawContext, fakeRawVersion)
     val result: Future[Result] = action.apply(request)
     test(result)
   }

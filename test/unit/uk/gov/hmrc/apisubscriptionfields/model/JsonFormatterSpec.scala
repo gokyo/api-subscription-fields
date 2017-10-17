@@ -17,7 +17,7 @@
 package unit.uk.gov.hmrc.apisubscriptionfields.model
 
 import org.scalatest.{Matchers, WordSpec}
-import uk.gov.hmrc.apisubscriptionfields.model.{JsonFormatters, SubscriptionFieldsResponse, FieldsDefinitionResponse}
+import uk.gov.hmrc.apisubscriptionfields.model.{BulkSubscriptionFieldsResponse, FieldsDefinitionResponse, JsonFormatters, SubscriptionFieldsResponse}
 import util.{FieldsDefinitionTestData, SubscriptionFieldsTestData}
 
 class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with SubscriptionFieldsTestData with FieldsDefinitionTestData {
@@ -25,6 +25,8 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
 
   private val fakeFields = Map( "f1" -> "v1" )
   private val subscriptionFieldsResponse = SubscriptionFieldsResponse(FakeRawIdentifier, FakeFieldsId, fakeFields)
+
+  private val bulkSubscriptionFieldsResponse = BulkSubscriptionFieldsResponse(Seq(subscriptionFieldsResponse))
 
   private val fakeFieldsDefinitionResponse = FieldsDefinitionResponse(Seq(FakeFieldDefinitionUrl))
 
@@ -40,6 +42,21 @@ class JsonFormatterSpec extends WordSpec with Matchers with JsonFormatters with 
     "unmarshal text" in {
       Json.parse(json).validate[SubscriptionFieldsResponse] match {
         case JsSuccess(r, _) => r shouldBe subscriptionFieldsResponse
+        case JsError(e) => fail(s"Should have parsed json text but got $e")
+      }
+    }
+  }
+
+  "BulkSubscriptionFieldsResponse" should {
+    val json = s"""{"fields":[{"id":"$FakeRawIdentifier","fieldsId":"$FakeRawFieldsId","fields":{"f1":"v1"}}]}"""
+
+    "marshal json" in {
+      objectAsJsonString(bulkSubscriptionFieldsResponse) shouldBe json
+    }
+
+    "unmarshal text" in {
+      Json.parse(json).validate[BulkSubscriptionFieldsResponse] match {
+        case JsSuccess(r, _) => r shouldBe bulkSubscriptionFieldsResponse
         case JsError(e) => fail(s"Should have parsed json text but got $e")
       }
     }

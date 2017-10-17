@@ -34,6 +34,8 @@ trait SubscriptionFieldsService {
 
   def get(subscriptionFieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFieldsResponse]]
 
+  def get(appId: AppId): Future[Option[BulkSubscriptionFieldsResponse]]
+
   def upsert(identifier: SubscriptionIdentifier, subscriptionFields: Fields): Future[(SubscriptionFieldsResponse, Boolean)]
 
   def delete(identifier: SubscriptionIdentifier): Future[Boolean]
@@ -97,4 +99,6 @@ class RepositoryFedSubscriptionFieldsService @Inject()(repository: SubscriptionF
   private def asResponse(apiSubscription: SubscriptionFields): SubscriptionFieldsResponse = {
     SubscriptionFieldsResponse(id = apiSubscription.id, fieldsId = SubscriptionFieldsId(apiSubscription.fieldsId), fields = apiSubscription.customFields)
   }
+
+  override def get(appId: AppId): Future[Option[BulkSubscriptionFieldsResponse]] = ???
 }

@@ -28,6 +28,8 @@ import reactivemongo.api.indexes.IndexType.Ascending
 import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
+import play.modules.reactivemongo.Formatters
+import uk.gov.hmrc.apisubscriptionfields.model.SubscriptionFieldsResponse
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -88,6 +90,17 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
       updateWriteResult => handleUpsertError(updateWriteResult, s"Could not save subscription fields: $subscription", updateWriteResult.upserted.size > 0)
     }
   }
+
+/*
+
+  collection.find(query, projection).cursor[BSONDocument]().collect[List](25) // get up to 25 documents
+*/
+
+def fetchByApplicationId(applicationId: String): Future[List[SubscriptionFieldsResponse]] = {
+  val selector: JsValue = Json.parse("{\"id\" : { $regex : /^" + applicationId + " }}") //TODO: use interpolation, escape $
+  Logger.debug(s"[fetchByApplicationId] selector: $selector")
+  collection.find(selector).cursor[SubscriptionFieldsResponse].collect[List]() //TODO: use non deprecated version
+}
 
   override def fetchById(id: String): Future[Option[SubscriptionFields]] = {
     val selector = selectorById(id)
