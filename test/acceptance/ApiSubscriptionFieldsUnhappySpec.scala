@@ -21,7 +21,7 @@ import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.test.Helpers._
-import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode.{FIELDS_DEFINITION_ID_NOT_FOUND, INVALID_REQUEST_PAYLOAD, SUBSCRIPTION_FIELDS_ID_NOT_FOUND}
+import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode.{FIELDS_DEFINITION_ID_NOT_FOUND, INVALID_REQUEST_PAYLOAD, NOT_FOUND_CODE}
 import uk.gov.hmrc.apisubscriptionfields.model.JsErrorResponse
 import util.SubscriptionFieldsTestData
 
@@ -49,7 +49,7 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe NOT_FOUND
 
       And("the response body is empty")
-      contentAsJson(resultFuture) shouldBe JsErrorResponse(SUBSCRIPTION_FIELDS_ID_NOT_FOUND, "Subscription Fields were not found")
+      contentAsJson(resultFuture) shouldBe JsErrorResponse(NOT_FOUND_CODE, s"Id ($fakeAppId, $fakeContext, $fakeVersion) was not found")
     }
 
     scenario("the API is called to GET with an unknown fields identifier") {
@@ -67,7 +67,7 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe NOT_FOUND
 
       And("the response body is empty")
-      contentAsJson(resultFuture) shouldBe JsErrorResponse(SUBSCRIPTION_FIELDS_ID_NOT_FOUND, "Subscription Fields were not found")
+      contentAsJson(resultFuture) shouldBe JsErrorResponse(NOT_FOUND_CODE, s"FieldsId (${FakeRawFieldsId.toString}) was not found")
     }
 
     scenario("the API is called to DELETE an unknown subscription fields identifier") {
@@ -85,7 +85,7 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
       status(resultFuture) shouldBe NOT_FOUND
 
       And("the response body is empty")
-      contentAsJson(resultFuture) shouldBe JsErrorResponse(SUBSCRIPTION_FIELDS_ID_NOT_FOUND, "Subscription Fields were not found")
+      contentAsJson(resultFuture) shouldBe JsErrorResponse(NOT_FOUND_CODE, s"Id ($fakeAppId, $fakeContext, $fakeVersion) was not found")
     }
 
     scenario("the API is called to PUT subscription fields with an invalid payload") {

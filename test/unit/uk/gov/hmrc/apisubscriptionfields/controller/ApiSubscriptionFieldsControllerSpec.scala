@@ -41,7 +41,7 @@ class ApiSubscriptionFieldsControllerSpec extends UnitSpec with SubscriptionFiel
       val result: Future[Result] = controller.getSubscriptionFields(fakeAppId, fakeContext, fakeVersion)(FakeRequest())
 
       status(result) shouldBe NOT_FOUND
-      (contentAsJson(result) \ "code") shouldBe JsDefined(JsString("SUBSCRIPTION_FIELDS_ID_NOT_FOUND"))
+      (contentAsJson(result) \ "message") shouldBe JsDefined(JsString(s"Id ($fakeAppId, $fakeContext, $fakeVersion) was not found"))
     }
   }
 

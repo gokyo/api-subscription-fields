@@ -22,7 +22,7 @@ import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import uk.gov.hmrc.apisubscriptionfields.model._
+import uk.gov.hmrc.apisubscriptionfields.model.{Fields, SubscriptionFieldsRequest, SubscriptionFieldsResponse, _}
 import util.{FieldsDefinitionTestData, RequestHeaders, SubscriptionFieldsTestData}
 
 import scala.concurrent.Future
@@ -52,6 +52,8 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
   private def fakeRequestWithHeaders: FakeRequest[AnyContentAsEmpty.type] = {
     FakeRequest().withHeaders(RequestHeaders.ACCEPT_HMRC_JSON_HEADER, RequestHeaders.CONTENT_TYPE_HEADER)
   }
+  def fieldsEndpoint(appId: String, apiContext: String, apiVersion: String) =
+    s"/field/application/$appId/context/$apiContext/version/$apiVersion"
 
   feature("Subscription-Fields") {
     Logger.logger.info(s"App.mode = ${app.mode.toString}")
