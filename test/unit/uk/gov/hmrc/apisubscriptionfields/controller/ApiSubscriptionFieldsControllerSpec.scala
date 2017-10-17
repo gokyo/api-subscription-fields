@@ -17,7 +17,7 @@
 package unit.uk.gov.hmrc.apisubscriptionfields.controller
 
 import org.scalamock.scalatest.MockFactory
-import play.api.libs.json.{JsDefined, JsString}
+import play.api.libs.json.{JsDefined, JsString, Json}
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
@@ -29,20 +29,54 @@ import util.SubscriptionFieldsTestData
 
 import scala.concurrent.Future
 
-class ApiSubscriptionFieldsControllerSpec extends UnitSpec with SubscriptionFieldsTestData with MockFactory {
+class ApiSubscriptionFieldsControllerSpec extends UnitSpec with SubscriptionFieldsTestData with MockFactory with JsonFormatters {
 
   private val mockSubscriptionFieldsService = mock[SubscriptionFieldsService]
   private val controller = new ApiSubscriptionFieldsController(mockSubscriptionFieldsService)
 
+  private val responseJsonString =
+    """{
+      |  "id":"[application-id]___[api-context]___[api-version]",
+      |  "fieldsId":"327d9145-4965-4d28-a2c5-39dedee50334",
+      |  "fields":{
+      |    "callback-id":"http://localhost",
+      |    "token":"abc123"
+      |  }
+      |}""".stripMargin
+  private val responseJson = Json.parse(responseJsonString)
+  private val responseModel = responseJson.as[SubscriptionFieldsResponse]
+
   "GET /application/{application id}/context/{api-context}/version/{api-version}" should {
+
+    "return OK when exists in the repo" in {
+      (mockSubscriptionFieldsService.get(_:SubscriptionIdentifier)) expects FakeSubscriptionIdentifier returns Future.successful(Some(responseModel))
+
+      val result = await(controller.getSubscriptionFields(fakeAppId, fakeContext, fakeVersion)(FakeRequest()))
+
+      status(result) shouldBe OK
+      contentAsJson(result) shouldBe responseJson
+    }
+
     "return NOT_FOUND when not in the repo" in {
       (mockSubscriptionFieldsService.get(_: SubscriptionIdentifier)) expects FakeSubscriptionIdentifier returns None
 
-      val result: Future[Result] = controller.getSubscriptionFields(fakeAppId, fakeContext, fakeVersion)(FakeRequest())
+      val result: Future[Result] = await(controller.getSubscriptionFields(fakeAppId, fakeContext, fakeVersion)(FakeRequest()))
 
       status(result) shouldBe NOT_FOUND
+      (contentAsJson(result) \ "code") shouldBe JsDefined(JsString("NOT_FOUND"))
       (contentAsJson(result) \ "message") shouldBe JsDefined(JsString(s"Id ($fakeAppId, $fakeContext, $fakeVersion) was not found"))
     }
+
+    "return INTERNAL_SERVER_ERROR when service throws exception" in {
+      (mockSubscriptionFieldsService.get(_:SubscriptionIdentifier)) expects FakeSubscriptionIdentifier returns Future.failed(emulatedFailure)
+
+      val result: Future[Result] = await(controller.getSubscriptionFields(fakeAppId, fakeContext, fakeVersion)(FakeRequest()))
+
+      status(result) shouldBe INTERNAL_SERVER_ERROR
+      (contentAsJson(result) \ "code") shouldBe JsDefined(JsString("UNKNOWN_ERROR"))
+      (contentAsJson(result) \ "message") shouldBe JsDefined(JsString("An unexpected error occurred"))
+    }
+
   }
 
 }
