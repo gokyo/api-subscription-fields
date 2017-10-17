@@ -25,10 +25,11 @@ class InMemoryRepository extends SubscriptionFieldsRepository {
   private[this] var values: Map[String, SubscriptionFields] = Map()
   private[this] var altKey: Map[UUID, String] = Map()
 
-  override def save(subscription: SubscriptionFields): Future[Unit] = {
+  override def upsert(subscription: SubscriptionFields): Future[Boolean] = {
+    val isInserted = values.contains(subscription.id)
     values = values + ((subscription.id, subscription))
     altKey = altKey + ((subscription.fieldsId, subscription.id))
-    Future.successful(Unit)
+    Future.successful(isInserted)
   }
 
   override def fetchById(identifier: String): Future[Option[SubscriptionFields]] = {

@@ -63,7 +63,7 @@ class InMemoryRepositorySpec extends org.scalatest.WordSpec with org.scalatest.M
       validateFakeIsAbsent()
       validateAltFakeIsAbsent()
 
-      repo.save(FakeApiSubscription)
+      repo.upsert(FakeApiSubscription)
       validateFakeIsPresent()
       validateAltFakeIsAbsent()
     }
@@ -75,7 +75,7 @@ class InMemoryRepositorySpec extends org.scalatest.WordSpec with org.scalatest.M
     }
 
     "Save Alt" in {
-      repo.save(AltFakeApiSubscription)
+      repo.upsert(AltFakeApiSubscription)
       validateFakeIsPresent()
       validateAltFakeIsPresent()
     }
@@ -87,12 +87,12 @@ class InMemoryRepositorySpec extends org.scalatest.WordSpec with org.scalatest.M
     }
 
     "Then save original again" in {
-      repo.save(FakeApiSubscription)
+      repo.upsert(FakeApiSubscription)
       validateFakeIsPresent()
     }
 
     "Then update original" in {
-      repo.save(UpdatedFakeApiSubscription)
+      repo.upsert(UpdatedFakeApiSubscription)
       validateFakeIsPresent(UpdatedFakeApiSubscription)
     }
   }

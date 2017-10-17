@@ -81,20 +81,13 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
     * Returns Future of isInserted Boolean flag if everything went OK - otherwise a failed Future with an error message.
     * @param fieldsDefinition entity to upsert
     */
-  override def upsert(fieldsDefinition: FieldsDefinition): Future[Boolean] = {
-    val selector = selectorById(fieldsDefinition.id)
-    Logger.debug(s"[save] selector: $selector")
-    collection.find(selector).one[BSONDocument].map {
-      case Some(document) => (collection.update(selector = BSONDocument("_id" -> document.get("_id")), update = fieldsDefinition), false)
-      case _ => (collection.insert(fieldsDefinition), true)
-    }.flatMap {
-      tuple => {
-        tuple._1.map(writeResult => handleError(writeResult, s"Could not save fields definition fields: $fieldsDefinition", tuple._2))
-      }
+  def upsert(fieldsDefinition: FieldsDefinition): Future[Boolean] = {
+    collection.update(selector = BSONDocument("_id" -> fieldsDefinition.id), update = fieldsDefinition, upsert = true).map {
+      updateWriteResult => handleError(updateWriteResult, "", updateWriteResult.upserted.size > 0)
     }
   }
 
-  private def handleError[T](result: WriteResult, exceptionMsg: => String, isInserted: Boolean): Boolean = {
+  private def handleError(result: WriteResult, exceptionMsg: => String, isInserted: Boolean): Boolean = {
 
     def databaseAltered(writeResult: WriteResult): Boolean = writeResult.n > 0
 
