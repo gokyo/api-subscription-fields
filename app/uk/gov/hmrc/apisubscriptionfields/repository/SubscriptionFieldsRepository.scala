@@ -65,6 +65,10 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
       indexName = Some("idIndex")
     ),
     createSingleFieldAscendingIndex(
+      indexFieldKey = "applicationId",
+      indexName = Some("applicationIdIndex")
+    ),
+    createSingleFieldAscendingIndex(
       indexFieldKey = "fieldsId",
       indexName = Some("fieldsIdIndex")
     )
@@ -91,9 +95,8 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
     }
   }
 
-  //TODO: look at explain plan to see if `id` index is used for regex
   def fetchByApplicationId(applicationId: String)(): Future[List[SubscriptionFields]] = {
-    val selector = Json.obj("id" -> Json.obj("$regex" -> ("^" + applicationId)))
+    val selector = Json.obj("applicationId" -> applicationId)
     Logger.debug(s"[fetchByApplicationId] selector: $selector")
     collection.find(selector).cursor[SubscriptionFields](ReadPreference.primary).collect[List]()
   }

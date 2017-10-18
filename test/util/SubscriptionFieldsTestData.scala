@@ -51,7 +51,7 @@ trait SubscriptionFieldsTestData extends TestData {
   final val EmptyResponse: Future[Option[SubscriptionFieldsResponse]] = Future.successful(None)
   final val CustomFields = Map("A" -> "X", "B" -> "Y")
 
-  final val FakeApiSubscription = SubscriptionFields(FakeRawIdentifier, FakeRawFieldsId, CustomFields)
+  final val FakeApiSubscription = SubscriptionFields(FakeRawIdentifier, fakeRawAppId, FakeRawFieldsId, CustomFields)
   final val FakeSubscriptionFieldsId = SubscriptionFieldsId(FakeRawFieldsId)
   final val FakeSubscriptionFieldsResponse: SubscriptionFieldsResponse = SubscriptionFieldsResponse(FakeRawIdentifier, FakeSubscriptionFieldsId, CustomFields)
 

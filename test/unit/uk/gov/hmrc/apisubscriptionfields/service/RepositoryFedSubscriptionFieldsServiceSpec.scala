@@ -111,8 +111,8 @@ class RepositoryFedSubscriptionFieldsServiceSpec extends UnitSpec with Subscript
     val uuids: Seq[UUID] = (1 to 10).map(_ => UUID.randomUUID())
 
     val service = new RepositoryFedSubscriptionFieldsService(new InMemoryRepository, new ListOfUUIDS(uuids))
-    val saveExpectation = SubscriptionFields(FakeRawIdentifier, uuids.head, CustomFields)
-    val updateExpectation = SubscriptionFields(FakeRawIdentifier, uuids.head, SomeOtherFields)
+    val saveExpectation = SubscriptionFields(FakeRawIdentifier, fakeRawAppId, uuids.head, CustomFields)
+    val updateExpectation = SubscriptionFields(FakeRawIdentifier, fakeRawAppId, uuids.head, SomeOtherFields)
 
     def saveSomething() = {
       service.upsert(FakeSubscriptionIdentifier, CustomFields) map { _ shouldBe ((saveExpectation, true)) }

@@ -31,9 +31,9 @@ class InMemoryRepositorySpec extends org.scalatest.WordSpec with org.scalatest.M
   private val FakeFieldsId = UUID.randomUUID()
   private val AltFakeFieldsId = UUID.randomUUID()
 
-  private val FakeApiSubscription = SubscriptionFields(FakeApplicaionIdentifier, FakeFieldsId, Map("f1" -> "v1", "f2" -> "v2"))
-  private val UpdatedFakeApiSubscription = SubscriptionFields(FakeApplicaionIdentifier, FakeFieldsId, Map("f2" -> "xyz", "f3" -> "v3"))
-  private val AltFakeApiSubscription = SubscriptionFields(AltFakeApplicaionIdentifier, AltFakeFieldsId, Map("f1" -> "v1", "f2" -> "v2"))
+  private val FakeApiSubscription = SubscriptionFields(FakeApplicaionIdentifier, FakeApplicaionIdentifier, FakeFieldsId, Map("f1" -> "v1", "f2" -> "v2"))
+  private val UpdatedFakeApiSubscription = SubscriptionFields(FakeApplicaionIdentifier, FakeApplicaionIdentifier, FakeFieldsId, Map("f2" -> "xyz", "f3" -> "v3"))
+  private val AltFakeApiSubscription = SubscriptionFields(AltFakeApplicaionIdentifier, FakeApplicaionIdentifier, AltFakeFieldsId, Map("f1" -> "v1", "f2" -> "v2"))
 
 
   "InMemoryRepository" should {
