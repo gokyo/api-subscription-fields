@@ -30,7 +30,9 @@ trait TestData {
   type EmulatedFailure = UnsupportedOperationException
   final val emulatedFailure = new EmulatedFailure("Emulated failure.")
   final val fakeRawAppId = UUID.randomUUID().toString
+  final val fakeRawAppId2 = UUID.randomUUID().toString
   final val fakeRawContext = "acontext"
+  final val fakeRawContext2 = "acontext2"
   final val fakeRawVersion = "1.0.2"
 }
 
@@ -38,7 +40,9 @@ trait TestData {
 trait SubscriptionFieldsTestData extends TestData {
 
   final val FakeAppId = AppId(fakeRawAppId)
+  final val FakeAppId2 = AppId(fakeRawAppId2)
   final val FakeSubscriptionIdentifier = SubscriptionIdentifier(FakeAppId, ApiContext(fakeRawContext), ApiVersion(fakeRawVersion))
+  final val FakeSubscriptionIdentifier2 = SubscriptionIdentifier(FakeAppId2, ApiContext(fakeRawContext), ApiVersion(fakeRawVersion))
   final val FakeRawIdentifier: String = FakeSubscriptionIdentifier.encode()
 
   final val FakeRawFieldsId = UUID.randomUUID()
@@ -49,7 +53,7 @@ trait SubscriptionFieldsTestData extends TestData {
 
   final val FakeApiSubscription = SubscriptionFields(FakeRawIdentifier, FakeRawFieldsId, CustomFields)
   final val FakeSubscriptionFieldsId = SubscriptionFieldsId(FakeRawFieldsId)
-  final val ValidResponse: SubscriptionFieldsResponse = SubscriptionFieldsResponse(FakeRawIdentifier, FakeSubscriptionFieldsId, CustomFields)
+  final val FakeSubscriptionFieldsResponse: SubscriptionFieldsResponse = SubscriptionFieldsResponse(FakeRawIdentifier, FakeSubscriptionFieldsId, CustomFields)
 
 }
 

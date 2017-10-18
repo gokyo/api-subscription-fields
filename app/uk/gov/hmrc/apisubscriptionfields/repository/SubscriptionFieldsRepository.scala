@@ -22,14 +22,13 @@ import javax.inject.{Inject, Singleton}
 import com.google.inject.ImplementedBy
 import play.api.Logger
 import play.api.libs.json._
+import reactivemongo.api.ReadPreference
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.api.indexes.Index
 import reactivemongo.api.indexes.IndexType.Ascending
 import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
-import play.modules.reactivemongo.Formatters
-import uk.gov.hmrc.apisubscriptionfields.model.SubscriptionFieldsResponse
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -45,6 +44,7 @@ trait SubscriptionFieldsRepository {
     */
   def upsert(subscription: SubscriptionFields): Future[Boolean]
 
+  def fetchByApplicationId(applicationId: String)(): Future[List[SubscriptionFields]]
   def fetchById(id: String): Future[Option[SubscriptionFields]]
   def fetchByFieldsId(fieldsId: UUID): Future[Option[SubscriptionFields]]
 
@@ -91,16 +91,12 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
     }
   }
 
-/*
-
-  collection.find(query, projection).cursor[BSONDocument]().collect[List](25) // get up to 25 documents
-*/
-
-def fetchByApplicationId(applicationId: String): Future[List[SubscriptionFieldsResponse]] = {
-  val selector: JsValue = Json.parse("{\"id\" : { $regex : /^" + applicationId + " }}") //TODO: use interpolation, escape $
-  Logger.debug(s"[fetchByApplicationId] selector: $selector")
-  collection.find(selector).cursor[SubscriptionFieldsResponse].collect[List]() //TODO: use non deprecated version
-}
+  //TODO: look at explain plan to see if `id` index is used for regex
+  def fetchByApplicationId(applicationId: String)(): Future[List[SubscriptionFields]] = {
+    val selector = Json.obj("id" -> Json.obj("$regex" -> ("^" + applicationId)))
+    Logger.debug(s"[fetchByApplicationId] selector: $selector")
+    collection.find(selector).cursor[SubscriptionFields](ReadPreference.primary).collect[List]()
+  }
 
   override def fetchById(id: String): Future[Option[SubscriptionFields]] = {
     val selector = selectorById(id)

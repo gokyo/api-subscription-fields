@@ -75,6 +75,15 @@ class RepositoryFedSubscriptionFieldsService @Inject()(repository: SubscriptionF
     repository.delete(id)
   }
 
+  override def get(appId: AppId): Future[Option[BulkSubscriptionFieldsResponse]] = ???
+
+//  override def get(appId: AppId): Future[Option[BulkSubscriptionFieldsResponse]] = {
+//    Logger.debug(s"[get] AppId: $appId")
+//    for {
+//      fetch <- repository.fetchByApplicationId(appId.value)
+//    } yield fetch.map(asResponse)
+//  }
+
   def get(identifier: SubscriptionIdentifier): Future[Option[SubscriptionFieldsResponse]] = {
     Logger.debug(s"[get] SubscriptionIdentifier: $identifier")
     for {
@@ -100,5 +109,4 @@ class RepositoryFedSubscriptionFieldsService @Inject()(repository: SubscriptionF
     SubscriptionFieldsResponse(id = apiSubscription.id, fieldsId = SubscriptionFieldsId(apiSubscription.fieldsId), fields = apiSubscription.customFields)
   }
 
-  override def get(appId: AppId): Future[Option[BulkSubscriptionFieldsResponse]] = ???
 }

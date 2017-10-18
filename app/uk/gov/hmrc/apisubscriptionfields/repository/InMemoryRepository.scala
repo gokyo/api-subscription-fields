@@ -32,6 +32,8 @@ class InMemoryRepository extends SubscriptionFieldsRepository {
     Future.successful(isInserted)
   }
 
+  override def fetchByApplicationId(applicationId: String)(): Future[List[SubscriptionFields]] = ???
+
   override def fetchById(identifier: String): Future[Option[SubscriptionFields]] = {
     Future.successful(values.get(identifier))
   }

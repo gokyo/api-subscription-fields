@@ -36,7 +36,7 @@ class ApiSubscriptionFieldsControllerPutSpec extends UnitSpec with SubscriptionF
 
   "PUT /field/application/:appId/context/:apiContext/version/:apiVersion" should {
     "return CREATED when created in the repo" in {
-      (mockSubscriptionFieldsService.upsert _).expects(FakeSubscriptionIdentifier, CustomFields).returns(Future.successful((ValidResponse, true)))
+      (mockSubscriptionFieldsService.upsert _).expects(FakeSubscriptionIdentifier, CustomFields).returns(Future.successful((FakeSubscriptionFieldsResponse, true)))
 
       val json = mkJson(SubscriptionFieldsRequest(CustomFields))
       testSubmitResult(mkRequest(json)) { result =>
@@ -45,7 +45,7 @@ class ApiSubscriptionFieldsControllerPutSpec extends UnitSpec with SubscriptionF
     }
 
     "return OK when updated in the repo" in {
-      (mockSubscriptionFieldsService.upsert _).expects(FakeSubscriptionIdentifier, CustomFields).returns(Future.successful((ValidResponse, false)))
+      (mockSubscriptionFieldsService.upsert _).expects(FakeSubscriptionIdentifier, CustomFields).returns(Future.successful((FakeSubscriptionFieldsResponse, false)))
 
       val json = mkJson(SubscriptionFieldsRequest(CustomFields))
       testSubmitResult(mkRequest(json)) { result =>

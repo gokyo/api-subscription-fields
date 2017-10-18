@@ -35,12 +35,28 @@ class RepositoryFedSubscriptionFieldsServiceSpec extends UnitSpec with Subscript
   private val SomeOtherFields = Map("f3" -> "v3", "f2" -> "v2b")
 
   "A RepositoryFedSubscriptionFieldsService" should {
-    "return Success None when no entry exist in the repo when get by application identifier is called" in {
+//    "return an empty list when no entry exist in the repo when get by application id is called" in {
+//      (mockSubscriptionFieldsIdRepository fetchByApplicationId  _) expects fakeRawAppId returns List()
+//
+//      val result = await(service.get(FakeAppId))
+//
+//      result shouldBe List()
+//    }
+
+    "return None when no entry exist in the repo when get by composite id is called" in {
       (mockSubscriptionFieldsIdRepository fetchById _) expects FakeSubscriptionIdentifier.encode() returns None
 
       val result = await(service.get(FakeSubscriptionIdentifier))
 
       result shouldBe None
+    }
+
+    "return Some SubscriptionFieldsResponse when composite id is found" in {
+      (mockSubscriptionFieldsIdRepository fetchById _) expects FakeSubscriptionIdentifier.encode() returns Some(FakeApiSubscription)
+
+      val result = await(service.get(FakeSubscriptionIdentifier))
+
+      result shouldBe Some(FakeSubscriptionFieldsResponse)
     }
 
     "return Successful true when an entry exists in the repo when delete is called" in {
@@ -58,22 +74,22 @@ class RepositoryFedSubscriptionFieldsServiceSpec extends UnitSpec with Subscript
 
       result shouldBe false
     }
-  }
 
-  "return Successful None when no entry exist in the repo when get by fields ID is called" in {
-    (mockSubscriptionFieldsIdRepository fetchByFieldsId _) expects FakeRawFieldsId returns None
+    "return Successful None when no entry exist in the repo when get by fields ID is called" in {
+      (mockSubscriptionFieldsIdRepository fetchByFieldsId _) expects FakeRawFieldsId returns None
 
-    val result = await(service.get(FakeFieldsId))
+      val result = await(service.get(FakeFieldsId))
 
-    result shouldBe None
-  }
+      result shouldBe None
+    }
 
-  "return Successful ApiSubscription when an entry exist in the repo when get by fields ID is called" in {
-    (mockSubscriptionFieldsIdRepository fetchByFieldsId _) expects FakeRawFieldsId returns Some(FakeApiSubscription)
+    "return Successful ApiSubscription when an entry exist in the repo when get by fields ID is called" in {
+      (mockSubscriptionFieldsIdRepository fetchByFieldsId _) expects FakeRawFieldsId returns Some(FakeApiSubscription)
 
-    val result = await(service.get(FakeFieldsId))
+      val result = await(service.get(FakeFieldsId))
 
-    result shouldBe Some(ValidResponse)
+      result shouldBe Some(FakeSubscriptionFieldsResponse)
+    }
   }
 
   //TODO this should be removed when removing InMemoryRepository

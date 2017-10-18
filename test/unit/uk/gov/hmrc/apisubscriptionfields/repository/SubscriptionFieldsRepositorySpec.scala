@@ -22,7 +22,7 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import reactivemongo.api.DB
 import reactivemongo.bson.BSONDocument
-import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters
+import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, AppId, JsonFormatters}
 import uk.gov.hmrc.apisubscriptionfields.repository.{MongoDbProvider, MongoFormatters, SubscriptionFields, SubscriptionFieldsMongoRepository}
 import uk.gov.hmrc.mongo.MongoSpecSupport
 import uk.gov.hmrc.play.test.UnitSpec
@@ -87,18 +87,24 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
   }
 
   "fetchByApplicationId" should {
-    "retrieve the correct record from the `id` " in {
-      val customFields = Map("field_1" -> "value_1", "field_2" -> "value_2", "field_3" -> "value_3")
-      val apiSubscription = SubscriptionFields(FakeSubscriptionIdentifier.encode, UUID.randomUUID(), customFields)
-      val isInserted = await(repository.upsert(apiSubscription))
-      collectionSize shouldBe 1
-      isInserted shouldBe true
+    "retrieve the correct records for an applicationId" in {
+      val apiSubForApp1Context1 = createSubscriptionFieldsWithApiContext()
+      val apiSubForApp1Context2 = createSubscriptionFieldsWithApiContext(rawContext = fakeRawContext2)
+      val apiSubForApp2Context1 = createSubscriptionFieldsWithApiContext(applicationId = fakeRawAppId2)
+      await(repository.upsert(apiSubForApp1Context1))
+      await(repository.upsert(apiSubForApp1Context2))
+      await(repository.upsert(apiSubForApp2Context1))
+      collectionSize shouldBe 3
 
-      await(repository.fetchByApplicationId(FakeSubscriptionIdentifier.applicationId.value)) shouldBe None
+      await(repository.fetchByApplicationId(fakeRawAppId)) shouldBe List(apiSubForApp1Context1, apiSubForApp1Context2)
+      await(repository.fetchByApplicationId(fakeRawAppId2)) shouldBe List(apiSubForApp2Context1)
+    }
+
+    "return an empty list when applicationId is not found" in {
+      await(repository.fetchByApplicationId("APP_ID_DOES_NOT_EXIST_IN_DB")) shouldBe List()
     }
 
   }
-
 
   "fetchById" should {
     "retrieve the correct record from the `id` " in {
@@ -179,5 +185,11 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
       collectionSize shouldBe 1
     }
   }
+
+  private def createSubscriptionFieldsWithApiContext(applicationId: String = fakeRawAppId, rawContext: String = fakeRawContext) = {
+    val customFields = Map("field_1" -> "value_1", "field_2" -> "value_2", "field_3" -> "value_3")
+    SubscriptionFields(FakeSubscriptionIdentifier.copy(applicationId = AppId(applicationId), apiContext = ApiContext(rawContext)).encode, UUID.randomUUID(), customFields)
+  }
+
 
 }
