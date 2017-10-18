@@ -44,7 +44,7 @@ trait SubscriptionFieldsRepository {
     */
   def upsert(subscription: SubscriptionFields): Future[Boolean]
 
-  def fetchByApplicationId(applicationId: String)(): Future[List[SubscriptionFields]]
+  def fetchByApplicationId(applicationId: String): Future[List[SubscriptionFields]]
   def fetchById(id: String): Future[Option[SubscriptionFields]]
   def fetchByFieldsId(fieldsId: UUID): Future[Option[SubscriptionFields]]
 
@@ -95,7 +95,7 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
     }
   }
 
-  def fetchByApplicationId(applicationId: String)(): Future[List[SubscriptionFields]] = {
+  def fetchByApplicationId(applicationId: String): Future[List[SubscriptionFields]] = {
     val selector = Json.obj("applicationId" -> applicationId)
     Logger.debug(s"[fetchByApplicationId] selector: $selector")
     collection.find(selector).cursor[SubscriptionFields](ReadPreference.primary).collect[List]()

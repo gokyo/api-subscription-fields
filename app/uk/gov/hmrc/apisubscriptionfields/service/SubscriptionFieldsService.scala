@@ -75,14 +75,17 @@ class RepositoryFedSubscriptionFieldsService @Inject()(repository: SubscriptionF
     repository.delete(id)
   }
 
-  override def get(appId: AppId): Future[Option[BulkSubscriptionFieldsResponse]] = ???
+  override def get(appId: AppId): Future[Option[BulkSubscriptionFieldsResponse]] = {
+    Logger.debug(s"[get] AppId: $appId")
+    val futureListSubscriptionFields: Future[List[SubscriptionFieldsResponse]] = for {
+      list <- repository.fetchByApplicationId(appId.value)
+    } yield list.map(asResponse)
 
-//  override def get(appId: AppId): Future[Option[BulkSubscriptionFieldsResponse]] = {
-//    Logger.debug(s"[get] AppId: $appId")
-//    for {
-//      fetch <- repository.fetchByApplicationId(appId.value)
-//    } yield fetch.map(asResponse)
-//  }
+    futureListSubscriptionFields.map{
+      case Nil => None
+      case list => Some(BulkSubscriptionFieldsResponse(fields = list))
+    }
+  }
 
   def get(identifier: SubscriptionIdentifier): Future[Option[SubscriptionFieldsResponse]] = {
     Logger.debug(s"[get] SubscriptionIdentifier: $identifier")

@@ -19,6 +19,7 @@ package unit.uk.gov.hmrc.apisubscriptionfields.service
 import java.util.UUID
 
 import org.scalamock.scalatest.MockFactory
+import uk.gov.hmrc.apisubscriptionfields.model.{BulkSubscriptionFieldsResponse, SubscriptionFieldsId, SubscriptionFieldsResponse}
 import uk.gov.hmrc.apisubscriptionfields.repository.{InMemoryRepository, SubscriptionFields, SubscriptionFieldsRepository}
 import uk.gov.hmrc.apisubscriptionfields.service.{RepositoryFedSubscriptionFieldsService, UUIDCreator}
 import uk.gov.hmrc.play.test.UnitSpec
@@ -35,13 +36,26 @@ class RepositoryFedSubscriptionFieldsServiceSpec extends UnitSpec with Subscript
   private val SomeOtherFields = Map("f3" -> "v3", "f2" -> "v2b")
 
   "A RepositoryFedSubscriptionFieldsService" should {
-//    "return an empty list when no entry exist in the repo when get by application id is called" in {
-//      (mockSubscriptionFieldsIdRepository fetchByApplicationId  _) expects fakeRawAppId returns List()
-//
-//      val result = await(service.get(FakeAppId))
-//
-//      result shouldBe List()
-//    }
+    "return an None when no entry exist in the repo when get by application id is called" in {
+      (mockSubscriptionFieldsIdRepository fetchByApplicationId  _) expects fakeRawAppId returns List()
+
+      val result = await(service.get(FakeAppId))
+
+      result shouldBe None
+    }
+
+    "return an Some response when entry exists in the repo when get by application id is called" in {
+      val subscriptionFields1 = createSubscriptionFieldsWithApiContext()
+      val subscriptionFields2 = createSubscriptionFieldsWithApiContext(rawContext = fakeRawContext2)
+      (mockSubscriptionFieldsIdRepository fetchByApplicationId  _) expects fakeRawAppId returns List(subscriptionFields1, subscriptionFields2)
+
+      val result = await(service.get(FakeAppId))
+
+      result shouldBe Some(BulkSubscriptionFieldsResponse(fields = Seq(
+        SubscriptionFieldsResponse(id = subscriptionFields1.id, fieldsId = SubscriptionFieldsId(subscriptionFields1.fieldsId), fields = subscriptionFields1.customFields),
+        SubscriptionFieldsResponse(id = subscriptionFields2.id, fieldsId = SubscriptionFieldsId(subscriptionFields2.fieldsId), fields = subscriptionFields2.customFields)
+      )))
+    }
 
     "return None when no entry exist in the repo when get by composite id is called" in {
       (mockSubscriptionFieldsIdRepository fetchById _) expects FakeSubscriptionIdentifier.encode() returns None

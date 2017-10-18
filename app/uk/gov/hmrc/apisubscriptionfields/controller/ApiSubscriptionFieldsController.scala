@@ -20,7 +20,7 @@ import java.util.UUID
 import javax.inject.{Inject, Singleton}
 
 import play.api.Logger
-import play.api.libs.json.{Format, JsValue, Json, Writes}
+import play.api.libs.json.{JsValue, Json, Writes}
 import play.api.mvc._
 import uk.gov.hmrc.apisubscriptionfields.model.ErrorCode._
 import uk.gov.hmrc.apisubscriptionfields.model._
@@ -65,16 +65,15 @@ class ApiSubscriptionFieldsController @Inject() (service: SubscriptionFieldsServ
   def getBulkSubscriptionFieldsByApplicationId(rawAppId: String): Action[AnyContent] = Action.async { implicit request =>
     Logger.debug(s"[getBulkSubscriptionFieldsByApplicationId] appId: $rawAppId")
     val eventualMaybeResponse = service.get(AppId(rawAppId))
-    asActionResult(eventualMaybeResponse, notFoundMessage(rawAppId))
+    asBulkActionResult(eventualMaybeResponse, notFoundMessage(rawAppId))
   }
 
-//TODO: remove
-//  private def asActionResult(eventualMaybeResponse: Future[Option[SubscriptionFieldsResponse]], notFoundMessage: String) = {
-//    eventualMaybeResponse map {
-//      case Some(subscriptionFields) => Ok(Json.toJson(subscriptionFields))
-//      case None => notFoundResponse(notFoundMessage)
-//    } recover recovery
-//  }
+  private def asBulkActionResult(eventualMaybeResponse: Future[Option[BulkSubscriptionFieldsResponse]], notFoundMessage: String) = {
+    eventualMaybeResponse map {
+      case Some(subscriptionFields) => Ok(Json.toJson(subscriptionFields))
+      case None => notFoundResponse(notFoundMessage)
+    } recover recovery
+  }
 
   private def asActionResult[T](eventualMaybeResponse: Future[Option[T]], notFoundMessage: String)(implicit writes: Writes[T]) = {
     eventualMaybeResponse map {

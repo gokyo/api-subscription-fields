@@ -186,10 +186,4 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
     }
   }
 
-  private def createSubscriptionFieldsWithApiContext(applicationId: String = fakeRawAppId, rawContext: String = fakeRawContext) = {
-    val customFields = Map("field_1" -> "value_1", "field_2" -> "value_2", "field_3" -> "value_3")
-    SubscriptionFields(FakeSubscriptionIdentifier.copy(applicationId = AppId(applicationId), apiContext = ApiContext(rawContext)).encode, applicationId, UUID.randomUUID(), customFields)
-  }
-
-
 }
