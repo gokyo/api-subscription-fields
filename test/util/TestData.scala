@@ -29,15 +29,20 @@ trait TestData {
   final val unit = ()
   type EmulatedFailure = UnsupportedOperationException
   final val emulatedFailure = new EmulatedFailure("Emulated failure.")
+  final val fakeRawAppId = UUID.randomUUID().toString
+  final val fakeRawAppId2 = UUID.randomUUID().toString
+  final val fakeRawContext = "acontext"
+  final val fakeRawContext2 = "acontext2"
+  final val fakeRawVersion = "1.0.2"
 }
 
 
 trait SubscriptionFieldsTestData extends TestData {
 
-  final val fakeAppId = UUID.randomUUID().toString
-  final val fakeContext = "acontext"
-  final val fakeVersion = "1.0.2"
-  final val FakeSubscriptionIdentifier = SubscriptionIdentifier(AppId(fakeAppId),ApiContext(fakeContext),ApiVersion(fakeVersion))
+  final val FakeAppId = AppId(fakeRawAppId)
+  final val FakeAppId2 = AppId(fakeRawAppId2)
+  final val FakeSubscriptionIdentifier = SubscriptionIdentifier(FakeAppId, ApiContext(fakeRawContext), ApiVersion(fakeRawVersion))
+  final val FakeSubscriptionIdentifier2 = SubscriptionIdentifier(FakeAppId2, ApiContext(fakeRawContext), ApiVersion(fakeRawVersion))
   final val FakeRawIdentifier: String = FakeSubscriptionIdentifier.encode()
 
   final val FakeRawFieldsId = UUID.randomUUID()
@@ -46,14 +51,18 @@ trait SubscriptionFieldsTestData extends TestData {
   final val EmptyResponse: Future[Option[SubscriptionFieldsResponse]] = Future.successful(None)
   final val CustomFields = Map("A" -> "X", "B" -> "Y")
 
-  final val FakeApiSubscription = SubscriptionFields(FakeRawIdentifier, FakeRawFieldsId, CustomFields)
+  final val FakeApiSubscription = SubscriptionFields(FakeRawIdentifier, fakeRawAppId, FakeRawFieldsId, CustomFields)
   final val FakeSubscriptionFieldsId = SubscriptionFieldsId(FakeRawFieldsId)
-  final val ValidResponse: SubscriptionFieldsResponse = SubscriptionFieldsResponse(FakeSubscriptionFieldsId, CustomFields)
+  final val FakeSubscriptionFieldsResponse: SubscriptionFieldsResponse = SubscriptionFieldsResponse(FakeRawIdentifier, FakeSubscriptionFieldsId, CustomFields)
 
+  def createSubscriptionFieldsWithApiContext(applicationId: String = fakeRawAppId, rawContext: String = fakeRawContext) = {
+    val customFields = Map("field_1" -> "value_1", "field_2" -> "value_2", "field_3" -> "value_3")
+    SubscriptionFields(FakeSubscriptionIdentifier.copy(applicationId = AppId(applicationId), apiContext = ApiContext(rawContext)).encode(), applicationId, UUID.randomUUID(), customFields)
+  }
 }
 
 trait FieldsDefinitionTestData extends TestData {
-  final val FakeFieldsDefinitionIdentifier = FieldsDefinitionIdentifier(ApiContext("apiContext"), ApiVersion("apiVersion"))
+  final val FakeFieldsDefinitionIdentifier = FieldsDefinitionIdentifier(ApiContext(fakeRawContext), ApiVersion(fakeRawVersion))
   final val FakeFieldDefinitionUrl = FieldDefinition("name1", "desc1", FieldDefinitionType.URL)
   final val FakeFieldDefinitionString = FieldDefinition("name2", "desc2", FieldDefinitionType.STRING)
   final val FakeFieldDefinitionSecureToken = FieldDefinition("name3", "desc3", FieldDefinitionType.SECURE_TOKEN)

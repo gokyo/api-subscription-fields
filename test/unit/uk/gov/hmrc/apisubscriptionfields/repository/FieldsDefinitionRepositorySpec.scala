@@ -65,30 +65,48 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
     val fieldsDefinition = createFieldsDefinition
   }
 
-  "save" should {
+  "upsert" should {
     "insert the record in the collection" in new Setup {
       collectionSize shouldBe 0
-      await(repository.save(fieldsDefinition))
+      val isInsertedAfterInsert = await(repository.upsert(fieldsDefinition))
       collectionSize shouldBe 1
 
       import reactivemongo.json._
 
+      isInsertedAfterInsert shouldBe true
       val selector = BSONDocument("id" -> fieldsDefinition.id)
       await(repository.collection.find(selector).one[FieldsDefinition]) shouldBe Some(fieldsDefinition)
+    }
+
+    "update the record in the collection" in new Setup {
+      import reactivemongo.json._
+      collectionSize shouldBe 0
+      val isInsertedAfterInsert = await(repository.upsert(fieldsDefinition))
+      collectionSize shouldBe 1
+      isInsertedAfterInsert shouldBe true
+      val edited = fieldsDefinition.copy(fields = Seq.empty)
+
+      val isInsertedAfterEdit = await(repository.upsert(edited))
+
+      isInsertedAfterEdit shouldBe false
+      val selector = BSONDocument("id" -> fieldsDefinition.id)
+      await(repository.collection.find(selector).one[FieldsDefinition]) shouldBe Some(edited)
     }
   }
 
   "fetchById" should {
     "retrieve the correct record from the `id` " in new Setup {
-      await(repository.save(fieldsDefinition))
+      val isInsertedAfterInsert = await(repository.upsert(fieldsDefinition))
       collectionSize shouldBe 1
+      isInsertedAfterInsert shouldBe true
 
       await(repository.fetchById(fieldsDefinition.id)) shouldBe Some(fieldsDefinition)
     }
 
     "return `None` when the `id` doesn't match any record in the collection" in {
       for (i <- 1 to 3) {
-        await(repository.save(createFieldsDefinition))
+        val isInsertedAfterInsert = await(repository.upsert(createFieldsDefinition))
+        isInsertedAfterInsert shouldBe true
       }
       collectionSize shouldBe 3
 
@@ -99,10 +117,12 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
   "collection" should {
     "have a unique index on `id` " in new Setup {
 
-      await(repository.save(fieldsDefinition))
+      val isInsertedAfterInsert = await(repository.upsert(fieldsDefinition))
       collectionSize shouldBe 1
+      isInsertedAfterInsert shouldBe true
 
-      await(repository.save(fieldsDefinition.copy(fields = Seq(FakeFieldDefinitionUrl))))
+      val isInsertedAfterEdit = await(repository.upsert(fieldsDefinition.copy(fields = Seq(FakeFieldDefinitionUrl))))
+      isInsertedAfterEdit shouldBe false
       collectionSize shouldBe 1
     }
   }

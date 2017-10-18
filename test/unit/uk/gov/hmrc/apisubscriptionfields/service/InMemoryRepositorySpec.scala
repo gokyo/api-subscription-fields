@@ -31,9 +31,9 @@ class InMemoryRepositorySpec extends org.scalatest.WordSpec with org.scalatest.M
   private val FakeFieldsId = UUID.randomUUID()
   private val AltFakeFieldsId = UUID.randomUUID()
 
-  private val FakeApiSubscription = SubscriptionFields(FakeApplicaionIdentifier, FakeFieldsId, Map("f1" -> "v1", "f2" -> "v2"))
-  private val UpdatedFakeApiSubscription = SubscriptionFields(FakeApplicaionIdentifier, FakeFieldsId, Map("f2" -> "xyz", "f3" -> "v3"))
-  private val AltFakeApiSubscription = SubscriptionFields(AltFakeApplicaionIdentifier, AltFakeFieldsId, Map("f1" -> "v1", "f2" -> "v2"))
+  private val FakeApiSubscription = SubscriptionFields(FakeApplicaionIdentifier, FakeApplicaionIdentifier, FakeFieldsId, Map("f1" -> "v1", "f2" -> "v2"))
+  private val UpdatedFakeApiSubscription = SubscriptionFields(FakeApplicaionIdentifier, FakeApplicaionIdentifier, FakeFieldsId, Map("f2" -> "xyz", "f3" -> "v3"))
+  private val AltFakeApiSubscription = SubscriptionFields(AltFakeApplicaionIdentifier, FakeApplicaionIdentifier, AltFakeFieldsId, Map("f1" -> "v1", "f2" -> "v2"))
 
 
   "InMemoryRepository" should {
@@ -63,7 +63,7 @@ class InMemoryRepositorySpec extends org.scalatest.WordSpec with org.scalatest.M
       validateFakeIsAbsent()
       validateAltFakeIsAbsent()
 
-      repo.save(FakeApiSubscription)
+      repo.upsert(FakeApiSubscription)
       validateFakeIsPresent()
       validateAltFakeIsAbsent()
     }
@@ -75,7 +75,7 @@ class InMemoryRepositorySpec extends org.scalatest.WordSpec with org.scalatest.M
     }
 
     "Save Alt" in {
-      repo.save(AltFakeApiSubscription)
+      repo.upsert(AltFakeApiSubscription)
       validateFakeIsPresent()
       validateAltFakeIsPresent()
     }
@@ -87,12 +87,12 @@ class InMemoryRepositorySpec extends org.scalatest.WordSpec with org.scalatest.M
     }
 
     "Then save original again" in {
-      repo.save(FakeApiSubscription)
+      repo.upsert(FakeApiSubscription)
       validateFakeIsPresent()
     }
 
     "Then update original" in {
-      repo.save(UpdatedFakeApiSubscription)
+      repo.upsert(UpdatedFakeApiSubscription)
       validateFakeIsPresent(UpdatedFakeApiSubscription)
     }
   }

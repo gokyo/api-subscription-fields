@@ -35,8 +35,12 @@ import scala.concurrent.Future
 @ImplementedBy(classOf[FieldsDefinitionMongoRepository])
 trait FieldsDefinitionRepository {
 
-  //TODO consider Future[Boolean]
-  def save(fieldsDefinition: FieldsDefinition): Future[Unit]
+  /**
+    * Saves or inserts entity depending on if it already exists.
+    * Returns Future of isInserted Boolean flag if everything went OK - otherwise a failed Future with an error message.
+    * @param fieldsDefinition entity to upsert
+    */
+  def upsert(fieldsDefinition: FieldsDefinition): Future[Boolean]
 
   def fetchById(id: String): Future[Option[FieldsDefinition]]
 }
@@ -72,19 +76,28 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
     collection.find(selector).one[FieldsDefinition]
   }
 
-  override def save(fieldsDefinition: FieldsDefinition): Future[Unit] = {
-    val selector = Json.obj("id" -> fieldsDefinition.id)
-    Logger.debug(s"[save] selector: $selector")
-    collection.find(selector).one[BSONDocument].flatMap {
-      case Some(document) => collection.update(selector = BSONDocument("_id" -> document.get("_id")), update = fieldsDefinition)
-      case _ => collection.insert(fieldsDefinition)
-    }.map {
-      writeResult => handleError(writeResult, s"Could not save fields definition fields: $fieldsDefinition")
+  /**
+    * Saves or inserts entity depending on if it already exists.
+    * Returns Future of isInserted Boolean flag if everything went OK - otherwise a failed Future with an error message.
+    * @param fieldsDefinition entity to upsert
+    */
+  def upsert(fieldsDefinition: FieldsDefinition): Future[Boolean] = {
+    collection.update(selector = BSONDocument("_id" -> fieldsDefinition.id), update = fieldsDefinition, upsert = true).map {
+      updateWriteResult => handleError(updateWriteResult, "", updateWriteResult.upserted.nonEmpty)
     }
   }
 
-  private def handleError[T](result: WriteResult, exceptionMsg: => String): Boolean = {
-    result.errmsg.fold(databaseAltered(result)) {
+  private def handleError(result: WriteResult, exceptionMsg: => String, isInserted: Boolean): Boolean = {
+
+    def databaseAltered(writeResult: WriteResult): Boolean = writeResult.n > 0
+
+    def handleError(result: WriteResult) =
+      if (databaseAltered(result))
+        isInserted
+      else
+        throw new RuntimeException(exceptionMsg)
+
+    result.errmsg.fold(handleError(result)) {
       errMsg => {
         val errorMsg = s"""$exceptionMsg. $errMsg"""
         logger.error(errorMsg)
@@ -92,8 +105,6 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
       }
     }
   }
-
-  private def databaseAltered(writeResult: WriteResult): Boolean = writeResult.n > 0
 
   private def selectorById(id: String) = Json.obj("id" -> id)
 

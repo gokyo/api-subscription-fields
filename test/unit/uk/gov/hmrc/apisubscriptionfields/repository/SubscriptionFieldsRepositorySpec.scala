@@ -22,7 +22,7 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import reactivemongo.api.DB
 import reactivemongo.bson.BSONDocument
-import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters
+import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, AppId, JsonFormatters}
 import uk.gov.hmrc.apisubscriptionfields.repository.{MongoDbProvider, MongoFormatters, SubscriptionFields, SubscriptionFieldsMongoRepository}
 import uk.gov.hmrc.mongo.MongoSpecSupport
 import uk.gov.hmrc.play.test.UnitSpec
@@ -64,7 +64,7 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
 
   private def createApiSubscription(): SubscriptionFields = {
     val customFields = Map("field_1" -> "value_1", "field_2" -> "value_2", "field_3" -> "value_3")
-    SubscriptionFields(s"${UUID.randomUUID().toString}-WhoCaresSoLongAsItsFixed", UUID.randomUUID(), customFields)
+    SubscriptionFields(s"${UUID.randomUUID().toString}-WhoCaresSoLongAsItsFixed", fakeRawAppId, UUID.randomUUID(), customFields)
   }
 
   private def collectionSize: Int = {
@@ -75,8 +75,9 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
     "insert the record in the collection" in {
       collectionSize shouldBe 0
       val apiSubscription = createApiSubscription()
-      await(repository.save(apiSubscription))
+      val isInserted = await(repository.upsert(apiSubscription))
       collectionSize shouldBe 1
+      isInserted shouldBe true
 
       import reactivemongo.json._
 
@@ -85,18 +86,40 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
     }
   }
 
+  "fetchByApplicationId" should {
+    "retrieve the correct records for an applicationId" in {
+      val apiSubForApp1Context1 = createSubscriptionFieldsWithApiContext()
+      val apiSubForApp1Context2 = createSubscriptionFieldsWithApiContext(rawContext = fakeRawContext2)
+      val apiSubForApp2Context1 = createSubscriptionFieldsWithApiContext(applicationId = fakeRawAppId2)
+      await(repository.upsert(apiSubForApp1Context1))
+      await(repository.upsert(apiSubForApp1Context2))
+      await(repository.upsert(apiSubForApp2Context1))
+      collectionSize shouldBe 3
+
+      await(repository.fetchByApplicationId(fakeRawAppId)) shouldBe List(apiSubForApp1Context1, apiSubForApp1Context2)
+      await(repository.fetchByApplicationId(fakeRawAppId2)) shouldBe List(apiSubForApp2Context1)
+    }
+
+    "return an empty list when applicationId is not found" in {
+      await(repository.fetchByApplicationId("APP_ID_DOES_NOT_EXIST_IN_DB")) shouldBe List()
+    }
+
+  }
+
   "fetchById" should {
     "retrieve the correct record from the `id` " in {
       val apiSubscription = createApiSubscription()
-      await(repository.save(apiSubscription))
+      val isInserted = await(repository.upsert(apiSubscription))
       collectionSize shouldBe 1
+      isInserted shouldBe true
 
       await(repository.fetchById(apiSubscription.id)) shouldBe Some(apiSubscription)
     }
 
     "return `None` when the `id` doesn't match any record in the collection" in {
       for (i <- 1 to 3) {
-        await(repository.save(createApiSubscription()))
+        val isInserted = await(repository.upsert(createApiSubscription()))
+        isInserted shouldBe true
       }
       collectionSize shouldBe 3
 
@@ -107,7 +130,8 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
   "fetchByFieldsId" should {
     "retrieve the correct record from the `fieldsId` " in {
       val apiSubscription = createApiSubscription()
-      await(repository.save(apiSubscription))
+      val isInserted = await(repository.upsert(apiSubscription))
+      isInserted shouldBe true
       collectionSize shouldBe 1
 
       await(repository.fetchByFieldsId(apiSubscription.fieldsId)) shouldBe Some(apiSubscription)
@@ -115,7 +139,8 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
 
     "return `None` when the `fieldsId` doesn't match any record in the collection" in {
       for (i <- 1 to 3) {
-        await(repository.save(createApiSubscription()))
+        val isInserted = await(repository.upsert(createApiSubscription()))
+        isInserted shouldBe true
       }
       collectionSize shouldBe 3
 
@@ -127,7 +152,8 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
     "remove the record with a specific id" in {
       val apiSubscription = createApiSubscription()
 
-      await(repository.save(apiSubscription))
+      val isInserted = await(repository.upsert(apiSubscription))
+      isInserted shouldBe true
       collectionSize shouldBe 1
 
       await(repository.delete(apiSubscription.id))
@@ -136,7 +162,8 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
 
     "not alter the collection for unknown ids" in {
       for (i <- 1 to 3) {
-        await(repository.save(createApiSubscription()))
+        val isInserted = await(repository.upsert(createApiSubscription()))
+        isInserted shouldBe true
       }
       collectionSize shouldBe 3
 
@@ -149,10 +176,12 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
     "have a unique index on `id` " in {
       val apiSubscription = createApiSubscription()
 
-      await(repository.save(apiSubscription))
+      val isInsertedAfterInsert = await(repository.upsert(apiSubscription))
+      isInsertedAfterInsert shouldBe true
       collectionSize shouldBe 1
 
-      await(repository.save(apiSubscription.copy(fieldsId = UUID.randomUUID())))
+      val isInsertedAfterEdit = await(repository.upsert(apiSubscription.copy(fieldsId = UUID.randomUUID())))
+      isInsertedAfterEdit shouldBe false
       collectionSize shouldBe 1
     }
   }

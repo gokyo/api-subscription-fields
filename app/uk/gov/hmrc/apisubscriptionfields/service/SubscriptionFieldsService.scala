@@ -34,6 +34,8 @@ trait SubscriptionFieldsService {
 
   def get(subscriptionFieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFieldsResponse]]
 
+  def get(appId: AppId): Future[Option[BulkSubscriptionFieldsResponse]]
+
   def upsert(identifier: SubscriptionIdentifier, subscriptionFields: Fields): Future[(SubscriptionFieldsResponse, Boolean)]
 
   def delete(identifier: SubscriptionIdentifier): Future[Boolean]
@@ -73,6 +75,16 @@ class RepositoryFedSubscriptionFieldsService @Inject()(repository: SubscriptionF
     repository.delete(id)
   }
 
+  override def get(appId: AppId): Future[Option[BulkSubscriptionFieldsResponse]] = {
+    Logger.debug(s"[get] AppId: $appId")
+    (for {
+      list <- repository.fetchByApplicationId(appId.value)
+    } yield list.map(asResponse)) map {
+      case Nil => None
+      case list => Some(BulkSubscriptionFieldsResponse(fields = list))
+    }
+  }
+
   def get(identifier: SubscriptionIdentifier): Future[Option[SubscriptionFieldsResponse]] = {
     Logger.debug(s"[get] SubscriptionIdentifier: $identifier")
     for {
@@ -89,12 +101,13 @@ class RepositoryFedSubscriptionFieldsService @Inject()(repository: SubscriptionF
 
   private def save(apiSubscription: SubscriptionFields): Future[SubscriptionFieldsResponse] = {
     Logger.debug(s"[save] SubscriptionFields: $apiSubscription")
-    repository.save(apiSubscription) map {
-      _ => SubscriptionFieldsResponse(SubscriptionFieldsId(apiSubscription.fieldsId), apiSubscription.customFields)
+    repository.upsert(apiSubscription) map {
+      _ => SubscriptionFieldsResponse(apiSubscription.id, SubscriptionFieldsId(apiSubscription.fieldsId), apiSubscription.customFields)
     }
   }
 
   private def asResponse(apiSubscription: SubscriptionFields): SubscriptionFieldsResponse = {
-    SubscriptionFieldsResponse(fieldsId = SubscriptionFieldsId(apiSubscription.fieldsId), fields = apiSubscription.customFields)
+    SubscriptionFieldsResponse(id = apiSubscription.id, fieldsId = SubscriptionFieldsId(apiSubscription.fieldsId), fields = apiSubscription.customFields)
   }
+
 }

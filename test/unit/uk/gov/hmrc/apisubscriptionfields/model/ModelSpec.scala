@@ -27,32 +27,32 @@ class ModelSpec extends WordSpec with Matchers with SubscriptionFieldsTestData {
   "SubscriptionIdentifier" should {
     "encode" should {
       "Handle simple case" in {
-        SubscriptionIdentifier(AppId(fakeAppId), ApiContext("XYZ"), ApiVersion("123")).encode() shouldBe s"$fakeAppId${Separator}XYZ${Separator}123"
+        SubscriptionIdentifier(AppId(fakeRawAppId), ApiContext("XYZ"), ApiVersion("123")).encode() shouldBe s"$fakeRawAppId${Separator}XYZ${Separator}123"
       }
       "Handle components with separators in them" in {
-        SubscriptionIdentifier(AppId(fakeAppId), ApiContext("X##Z"), ApiVersion("123")).encode() shouldBe s"$fakeAppId$Separator${Separator}X##Z$Separator${Separator}123"
+        SubscriptionIdentifier(AppId(fakeRawAppId), ApiContext("X##Z"), ApiVersion("123")).encode() shouldBe s"$fakeRawAppId$Separator${Separator}X##Z$Separator${Separator}123"
       }
       "Handle components with multiple separators in them" in {
         val sep = "######"
-        SubscriptionIdentifier(AppId(fakeAppId), ApiContext("X##Z"), ApiVersion("12####3")).encode() shouldBe s"$fakeAppId${sep}X##Z${sep}12####3"
+        SubscriptionIdentifier(AppId(fakeRawAppId), ApiContext("X##Z"), ApiVersion("12####3")).encode() shouldBe s"$fakeRawAppId${sep}X##Z${sep}12####3"
       }
     }
 
     "decode" should {
       "Handle simple case" in {
-        SubscriptionIdentifier.decode(s"$fakeAppId${Separator}XYZ${Separator}123") shouldBe
-          Some(SubscriptionIdentifier(AppId(fakeAppId), ApiContext("XYZ"), ApiVersion("123")))
+        SubscriptionIdentifier.decode(s"$fakeRawAppId${Separator}XYZ${Separator}123") shouldBe
+          Some(SubscriptionIdentifier(AppId(fakeRawAppId), ApiContext("XYZ"), ApiVersion("123")))
       }
       "Handle components with separators in them" in {
-        SubscriptionIdentifier.decode(s"$fakeAppId$Separator${Separator}X##Z$Separator${Separator}123") shouldBe
-          Some(SubscriptionIdentifier(AppId(fakeAppId), ApiContext("X##Z"), ApiVersion("123")))
+        SubscriptionIdentifier.decode(s"$fakeRawAppId$Separator${Separator}X##Z$Separator${Separator}123") shouldBe
+          Some(SubscriptionIdentifier(AppId(fakeRawAppId), ApiContext("X##Z"), ApiVersion("123")))
       }
       "Handle components with multiple separators in them" in {
-        SubscriptionIdentifier.decode(s"$fakeAppId$Separator$Separator${Separator}X##Z$Separator$Separator${Separator}12####3") shouldBe
-          Some(SubscriptionIdentifier(AppId(fakeAppId), ApiContext("X##Z"), ApiVersion("12####3")))
+        SubscriptionIdentifier.decode(s"$fakeRawAppId$Separator$Separator${Separator}X##Z$Separator$Separator${Separator}12####3") shouldBe
+          Some(SubscriptionIdentifier(AppId(fakeRawAppId), ApiContext("X##Z"), ApiVersion("12####3")))
       }
       "Handle invalid number of parts" in {
-        SubscriptionIdentifier.decode(s"$fakeAppId") shouldBe None
+        SubscriptionIdentifier.decode(s"$fakeRawAppId") shouldBe None
       }
     }
   }
@@ -86,7 +86,7 @@ class ModelSpec extends WordSpec with Matchers with SubscriptionFieldsTestData {
           Some(FieldsDefinitionIdentifier(ApiContext("X##Z"), ApiVersion("12####3")))
       }
       "Handle invalid number of parts" in {
-        SubscriptionIdentifier.decode(s"""$fakeAppId""") shouldBe None
+        SubscriptionIdentifier.decode(s"""$fakeRawAppId""") shouldBe None
       }
     }
   }

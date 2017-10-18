@@ -18,30 +18,38 @@ package unit.uk.gov.hmrc.apisubscriptionfields.controller
 
 import org.scalamock.scalatest.MockFactory
 import play.api.libs.json.{JsDefined, JsString}
-import play.api.mvc._
+import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import play.api.test._
 import uk.gov.hmrc.apisubscriptionfields.controller.ApiSubscriptionFieldsController
-import uk.gov.hmrc.apisubscriptionfields.model._
+import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters
 import uk.gov.hmrc.apisubscriptionfields.service.SubscriptionFieldsService
 import uk.gov.hmrc.play.test.UnitSpec
 import util.SubscriptionFieldsTestData
 
 import scala.concurrent.Future
 
-class ApiSubscriptionFieldsControllerSpec extends UnitSpec with SubscriptionFieldsTestData with MockFactory {
+class ApiSubscriptionFieldsControllerDeleteSpec extends UnitSpec with SubscriptionFieldsTestData with MockFactory with JsonFormatters {
 
   private val mockSubscriptionFieldsService = mock[SubscriptionFieldsService]
   private val controller = new ApiSubscriptionFieldsController(mockSubscriptionFieldsService)
 
-  "GET /application/{application id}/context/{api-context}/version/{api-version}" should {
-    "return NOT_FOUND when not in the repo" in {
-      (mockSubscriptionFieldsService.get(_: SubscriptionIdentifier)) expects FakeSubscriptionIdentifier returns None
+  "DELETE /field/application/:appId/context/:apiContext/version/:apiVersion" should {
+    "return NO_CONTENT (204) when successfully deleted from repo" in {
+      (mockSubscriptionFieldsService.delete _).expects(FakeSubscriptionIdentifier).returns(Future.successful(true))
 
-      val result: Future[Result] = controller.getSubscriptionFields(fakeAppId, fakeContext, fakeVersion)(FakeRequest())
+      val result = await(controller.deleteSubscriptionFields(fakeRawAppId, fakeRawContext, fakeRawVersion)(FakeRequest()))
+
+      status(result) shouldBe NO_CONTENT
+    }
+
+    "return NOT_FOUND (404) when failed to delete from repo" in {
+      (mockSubscriptionFieldsService.delete _).expects(FakeSubscriptionIdentifier).returns(Future.successful(false))
+
+      val result = await(controller.deleteSubscriptionFields(fakeRawAppId, fakeRawContext, fakeRawVersion)(FakeRequest()))
 
       status(result) shouldBe NOT_FOUND
-      (contentAsJson(result) \ "message") shouldBe JsDefined(JsString(s"Id ($fakeAppId, $fakeContext, $fakeVersion) was not found"))
+      (contentAsJson(result) \ "code") shouldBe JsDefined(JsString("NOT_FOUND"))
+      (contentAsJson(result) \ "message") shouldBe JsDefined(JsString(s"Id ($fakeRawAppId, $fakeRawContext, $fakeRawVersion) was not found"))
     }
   }
 

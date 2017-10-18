@@ -22,6 +22,7 @@ import javax.inject.{Inject, Singleton}
 import com.google.inject.ImplementedBy
 import play.api.Logger
 import play.api.libs.json._
+import reactivemongo.api.ReadPreference
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.api.indexes.Index
 import reactivemongo.api.indexes.IndexType.Ascending
@@ -36,9 +37,14 @@ import scala.concurrent.Future
 @ImplementedBy(classOf[SubscriptionFieldsMongoRepository])
 trait SubscriptionFieldsRepository {
 
-  //TODO consider Future[Boolean]
-  def save(subscription: SubscriptionFields): Future[Unit]
+  /**
+    * Saves or inserts entity depending on if it already exists.
+    * Returns Future of isInserted Boolean flag if everything went OK - otherwise a failed Future with an error message.
+    * @param subscription entity to upsert
+    */
+  def upsert(subscription: SubscriptionFields): Future[Boolean]
 
+  def fetchByApplicationId(applicationId: String): Future[List[SubscriptionFields]]
   def fetchById(id: String): Future[Option[SubscriptionFields]]
   def fetchByFieldsId(fieldsId: UUID): Future[Option[SubscriptionFields]]
 
@@ -59,6 +65,10 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
       indexName = Some("idIndex")
     ),
     createSingleFieldAscendingIndex(
+      indexFieldKey = "applicationId",
+      indexName = Some("applicationIdIndex")
+    ),
+    createSingleFieldAscendingIndex(
       indexFieldKey = "fieldsId",
       indexName = Some("fieldsIdIndex")
     )
@@ -74,16 +84,21 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
     )
   }
 
-  //TODO change return type to boolean
-  override def save(subscription: SubscriptionFields): Future[Unit] = {
-    val selector = selectorById(subscription.id)
-    Logger.debug(s"[save] selector: $selector")
-    collection.find(selector).one[BSONDocument].flatMap {
-      case Some(document) => collection.update(selector = BSONDocument("_id" -> document.get("_id")), update = subscription)
-      case _ => collection.insert(subscription)
-    }.map {
-      writeResult => handleError(writeResult, s"Could not save subscription fields: $subscription")
+  /**
+    * Saves or inserts entity depending on if it already exists.
+    * Returns Future of isInserted Boolean flag if everything went OK - otherwise a failed Future with an error message.
+    * @param subscription entity to upsert
+    */
+  def upsert(subscription: SubscriptionFields): Future[Boolean] = {
+    collection.update(selector = BSONDocument("_id" -> subscription.id), update = subscription, upsert = true).map {
+      updateWriteResult => handleUpsertError(updateWriteResult, s"Could not save subscription fields: $subscription", updateWriteResult.upserted.nonEmpty)
     }
+  }
+
+  def fetchByApplicationId(applicationId: String): Future[List[SubscriptionFields]] = {
+    val selector = Json.obj("applicationId" -> applicationId)
+    Logger.debug(s"[fetchByApplicationId] selector: $selector")
+    collection.find(selector).cursor[SubscriptionFields](ReadPreference.primary).collect[List]()
   }
 
   override def fetchById(id: String): Future[Option[SubscriptionFields]] = {
@@ -101,12 +116,27 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
     val selector = selectorById(id)
     Logger.debug(s"[delete] selector: $selector")
     collection.remove(selector).map {
-      writeResult => handleError(writeResult, s"Could not delete subscription fields for id: $id")
+      writeResult => handleDeleteError(writeResult, s"Could not delete subscription fields for id: $id")
     }
   }
 
-  private def handleError[T](result: WriteResult, exceptionMsg: => String): Boolean = {
-    result.errmsg.fold(databaseAltered(result)) {
+  private def handleDeleteError(result: WriteResult, exceptionMsg: => String): Boolean = {
+    handleError(result, databaseAltered, exceptionMsg)
+  }
+
+  private def handleUpsertError(result: WriteResult, exceptionMsg: => String, isInserted: Boolean): Boolean = {
+
+    def handleUpsertError(result: WriteResult) =
+      if (databaseAltered(result))
+        isInserted
+      else
+        throw new RuntimeException(exceptionMsg)
+
+    handleError(result, handleUpsertError, exceptionMsg)
+  }
+
+  private def handleError(result: WriteResult, f: WriteResult => Boolean, exceptionMsg: String): Boolean = {
+    result.errmsg.fold(f(result)) {
       errMsg => {
         val errorMsg = s"""$exceptionMsg. $errMsg"""
         logger.error(errorMsg)
