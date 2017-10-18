@@ -70,6 +70,24 @@ class ApiSubscriptionFieldsUnhappySpec extends AcceptanceTestSpec
       contentAsJson(resultFuture) shouldBe JsErrorResponse(NOT_FOUND_CODE, s"FieldsId (${FakeRawFieldsId.toString}) was not found")
     }
 
+    scenario("the API is called to GET an unknown application identifier") {
+
+      Given("the API is called to GET an unknown application identifier")
+      val request = ValidRequest.copyFakeRequest(method = GET, uri = appIdEndpoint(fakeRawAppId))
+
+      When("a GET request with data is sent to the API")
+      val result: Option[Future[Result]] = route(app, request)
+
+      Then(s"a response with a 404 status is received")
+      result shouldBe 'defined
+      val resultFuture = result.value
+
+      status(resultFuture) shouldBe NOT_FOUND
+
+      And("the response body is empty")
+      contentAsJson(resultFuture) shouldBe JsErrorResponse(NOT_FOUND_CODE, s"ApplicationId ($fakeRawAppId) was not found")
+    }
+
     scenario("the API is called to DELETE an unknown subscription fields identifier") {
 
       Given("a request with an unknown identifier")

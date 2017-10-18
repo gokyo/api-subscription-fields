@@ -35,6 +35,11 @@ curl -v -X GET -H "Content-Type: application/json" -H "Cache-Control: no-cache" 
 curl -v -X GET -H "Content-Type: application/json" -H "Cache-Control: no-cache" "http://localhost:9000/field/application/327d9145-4965-4d28-a2c5-39dedee50334/context/ciao-api/version/1.0"
 ```
 
+#### Get subscription fields by application id 
+```
+curl -v -X GET -H "Content-Type: application/json" -H "Cache-Control: no-cache" "http://localhost:9000/field/application/327d9145-4965-4d28-a2c5-39dedee50334"
+
+```
 #### Delete subscription fields by application id, API context, API version
 ```
 curl -v -X DELETE -H "Cache-Control: no-cache" "http://localhost:9000/field/application/327d9145-4965-4d28-a2c5-39dedee50334/context/ciao-api/version/1.0"

@@ -135,6 +135,27 @@ class ApiSubscriptionFieldsSpec extends AcceptanceTestSpec
       sfrFieldsId.get should matchPattern { case SubscriptionFieldsResponse(FakeRawIdentifier, `fieldsId`, SampleFields1) => }
     }
 
+    scenario("the API is called to GET with a known application identifier") {
+
+      Given("a request with a known application identifier")
+      val request = ValidRequest.copyFakeRequest(method = GET, uri = appIdEndpoint(fakeRawAppId))
+
+      When("a GET request with data is sent to the API")
+      val result: Option[Future[Result]] = route(app, request)
+
+      Then(s"a response with a 200 status is received")
+      result shouldBe 'defined
+      val resultFuture = result.value
+
+      status(resultFuture) shouldBe OK
+
+      And("the response body should be a valid response")
+      val sfr = contentAsJson(resultFuture).validate[BulkSubscriptionFieldsResponse]
+
+      sfr.isSuccess shouldBe true
+      sfr.get should matchPattern { case BulkSubscriptionFieldsResponse(Seq(SubscriptionFieldsResponse(FakeRawIdentifier, _, SampleFields1))) => }
+    }
+
     scenario("the API is called to store more values for an existing subscription identifier") {
 
       Given("a request with valid payload")
