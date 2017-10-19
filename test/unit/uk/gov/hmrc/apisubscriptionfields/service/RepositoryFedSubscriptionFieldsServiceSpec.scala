@@ -16,16 +16,12 @@
 
 package unit.uk.gov.hmrc.apisubscriptionfields.service
 
-import java.util.UUID
-
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.apisubscriptionfields.model.{BulkSubscriptionFieldsResponse, SubscriptionFieldsId, SubscriptionFieldsResponse}
-import uk.gov.hmrc.apisubscriptionfields.repository.{SubscriptionFieldsInMemoryRepository, SubscriptionFields, SubscriptionFieldsRepository}
+import uk.gov.hmrc.apisubscriptionfields.repository.SubscriptionFieldsRepository
 import uk.gov.hmrc.apisubscriptionfields.service.{RepositoryFedSubscriptionFieldsService, UUIDCreator}
 import uk.gov.hmrc.play.test.UnitSpec
 import util.SubscriptionFieldsTestData
-
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class RepositoryFedSubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTestData with MockFactory {
 
@@ -106,70 +102,4 @@ class RepositoryFedSubscriptionFieldsServiceSpec extends UnitSpec with Subscript
     }
   }
 
-  //TODO this should be removed when removing InMemoryRepository
-  "A Service using an in memory repository" should {
-
-    class ListOfUUIDS(initial: Seq[UUID]) extends UUIDCreator {
-      private var uuids = initial
-
-      override def uuid(): UUID = {
-        uuids match {
-          case Nil => throw new RuntimeException("List of UUIDs exhausted")
-          case h :: t =>
-            uuids = t
-            h
-        }
-      }
-    }
-
-    val uuids: Seq[UUID] = (1 to 10).map(_ => UUID.randomUUID())
-
-    val service = new RepositoryFedSubscriptionFieldsService(new SubscriptionFieldsInMemoryRepository, new ListOfUUIDS(uuids))
-    val saveExpectation = SubscriptionFields(FakeRawIdentifier, fakeRawAppId, uuids.head, CustomFields)
-    val updateExpectation = SubscriptionFields(FakeRawIdentifier, fakeRawAppId, uuids.head, SomeOtherFields)
-
-    def saveSomething() = {
-      service.upsert(FakeSubscriptionIdentifier, CustomFields) map { _ shouldBe ((saveExpectation, true)) }
-    }
-
-    def updateIt() = {
-      service.upsert(FakeSubscriptionIdentifier, SomeOtherFields) map { _ shouldBe ((updateExpectation, false)) }
-    }
-
-    def deleteIt() = {
-      service.delete(FakeSubscriptionIdentifier)
-    }
-
-    "be able to handle finding nothing" in {
-      service.get(FakeSubscriptionIdentifier) map { _ shouldBe None }
-      service.get(FakeFieldsId) map { _ shouldBe None }
-    }
-
-    "be able to save something to the repo" in {
-      saveSomething()
-
-      service.get(FakeSubscriptionIdentifier) map { _ shouldBe Some(saveExpectation) }
-      service.get(FakeFieldsId) map { _ shouldBe Some(saveExpectation) }
-    }
-
-    "be able to save something and then update it" in {
-      saveSomething()
-      updateIt()
-
-      service.get(FakeSubscriptionIdentifier) map { _ shouldBe Some(updateExpectation) }
-      service.get(FakeFieldsId) map { _ shouldBe Some(updateExpectation) }
-    }
-
-    "be able to save something and then delete it" in {
-      saveSomething()
-
-      service.get(FakeSubscriptionIdentifier) map { _ shouldBe Some(saveExpectation) }
-      service.get(FakeFieldsId) map { _ shouldBe Some(saveExpectation) }
-
-      deleteIt()
-
-      service.get(FakeSubscriptionIdentifier) map { _ shouldBe empty }
-      service.get(FakeFieldsId) map { _ shouldBe empty }
-    }
-  }
 }
