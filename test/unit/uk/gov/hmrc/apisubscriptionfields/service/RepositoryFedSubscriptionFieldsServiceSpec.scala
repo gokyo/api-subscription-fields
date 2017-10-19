@@ -17,7 +17,7 @@
 package unit.uk.gov.hmrc.apisubscriptionfields.service
 
 import org.scalamock.scalatest.MockFactory
-import uk.gov.hmrc.apisubscriptionfields.model.{BulkSubscriptionFieldsResponse, SubscriptionFieldsId, SubscriptionFieldsResponse}
+import uk.gov.hmrc.apisubscriptionfields.model.{BulkSubscriptionFieldsResponse, SubscriptionFieldsId, SubscriptionFieldsResponse, SubscriptionIdentifier}
 import uk.gov.hmrc.apisubscriptionfields.repository.SubscriptionFieldsRepository
 import uk.gov.hmrc.apisubscriptionfields.service.{RepositoryFedSubscriptionFieldsService, UUIDCreator}
 import uk.gov.hmrc.play.test.UnitSpec
@@ -54,7 +54,7 @@ class RepositoryFedSubscriptionFieldsServiceSpec extends UnitSpec with Subscript
     }
 
     "return None when no entry exist in the repo when get by composite id is called" in {
-      (mockSubscriptionFieldsIdRepository fetchById _) expects FakeSubscriptionIdentifier.encode() returns None
+      (mockSubscriptionFieldsIdRepository fetchById (_: SubscriptionIdentifier)) expects FakeSubscriptionIdentifier returns None
 
       val result = await(service.get(FakeSubscriptionIdentifier))
 
@@ -62,7 +62,7 @@ class RepositoryFedSubscriptionFieldsServiceSpec extends UnitSpec with Subscript
     }
 
     "return Some SubscriptionFieldsResponse when composite id is found" in {
-      (mockSubscriptionFieldsIdRepository fetchById _) expects FakeSubscriptionIdentifier.encode() returns Some(FakeApiSubscription)
+      (mockSubscriptionFieldsIdRepository fetchById (_: SubscriptionIdentifier)) expects FakeSubscriptionIdentifier returns Some(FakeApiSubscription)
 
       val result = await(service.get(FakeSubscriptionIdentifier))
 

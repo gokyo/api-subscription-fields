@@ -24,9 +24,10 @@ import play.api.Logger
 import play.api.libs.json._
 import reactivemongo.api.ReadPreference
 import reactivemongo.api.commands.WriteResult
-import reactivemongo.api.indexes.Index
+import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.api.indexes.IndexType.Ascending
 import reactivemongo.bson.{BSONDocument, BSONObjectID}
+import uk.gov.hmrc.apisubscriptionfields.model.SubscriptionIdentifier
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
@@ -41,6 +42,7 @@ trait SubscriptionFieldsRepository {
 
   def fetchByApplicationId(applicationId: String): Future[List[SubscriptionFields]]
   def fetchById(id: String): Future[Option[SubscriptionFields]]
+  def fetchById(identifier: SubscriptionIdentifier): Future[Option[SubscriptionFields]]
   def fetchByFieldsId(fieldsId: UUID): Future[Option[SubscriptionFields]]
 
   def delete(id: String): Future[Boolean]
@@ -55,8 +57,12 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
   private implicit val format = MongoFormatters.SubscriptionFieldsJF
 
   override def indexes = Seq(
-    createSingleFieldAscendingIndex(
-      indexFieldKey = "id",
+    createCompoundIndex(
+      indexFieldMappings = Seq(
+        "applicationId" -> IndexType.Ascending,
+        "apiContext" -> IndexType.Ascending,
+        "apiVersion" -> IndexType.Ascending
+      ),
       indexName = Some("idIndex")
     ),
     createSingleFieldAscendingIndex(
@@ -71,13 +77,21 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
 
   private def createSingleFieldAscendingIndex(indexFieldKey: String, indexName: Option[String],
                                               isUnique: Boolean = false, isBackground: Boolean = true): Index = {
+
+    createCompoundIndex(Seq(indexFieldKey -> Ascending), indexName, isUnique, isBackground)
+  }
+
+  private def createCompoundIndex(indexFieldMappings: Seq[(String, IndexType)], indexName: Option[String],
+                                         isUnique: Boolean = false, isBackground: Boolean = true): Index = {
+
     Index(
-      key = Seq(indexFieldKey -> Ascending),
+      key = indexFieldMappings,
       name = indexName,
       unique = isUnique,
       background = isBackground
     )
   }
+
 
   override def save(subscription: SubscriptionFields): Future[Boolean] = {
     collection.update(selector = BSONDocument("id" -> subscription.id), update = subscription, upsert = true).map {
@@ -96,6 +110,17 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
     Logger.debug(s"[fetchById] selector: $selector")
     collection.find(selector).one[SubscriptionFields]
   }
+
+  override def fetchById(identifier: SubscriptionIdentifier): Future[Option[SubscriptionFields]] = {
+    val selector = Json.obj(
+      "applicationId" -> identifier.applicationId.value,
+      "apiContext" -> identifier.apiContext.value,
+      "apiVersion" -> identifier.apiVersion.value
+    )
+    Logger.debug(s"[fetchById] selector: $selector")
+    collection.find(selector).one[SubscriptionFields]
+  }
+
   override def fetchByFieldsId(fieldsId: UUID): Future[Option[SubscriptionFields]] = {
     val selector = Json.obj("fieldsId" -> fieldsId)
     Logger.debug(s"[fetchByFieldsId] selector: $selector")

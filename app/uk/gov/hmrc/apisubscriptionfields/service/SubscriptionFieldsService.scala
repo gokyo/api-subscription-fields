@@ -59,7 +59,7 @@ class RepositoryFedSubscriptionFieldsService @Inject()(repository: SubscriptionF
 
     Logger.debug(s"[upsert] SubscriptionIdentifier: $identifier")
 
-    repository.fetchById(identifier.encode()) flatMap {
+    repository.fetchById(identifier) flatMap {
       o =>
         o.fold(
           create() map { x => (x, true) }
@@ -69,7 +69,7 @@ class RepositoryFedSubscriptionFieldsService @Inject()(repository: SubscriptionF
     }
   }
 
-  def delete(identifier: SubscriptionIdentifier): Future[Boolean] = {
+  override def delete(identifier: SubscriptionIdentifier): Future[Boolean] = {
     val id = identifier.encode()
     Logger.debug(s"[delete] SubscriptionIdentifier: $identifier")
     repository.delete(id)
@@ -85,14 +85,14 @@ class RepositoryFedSubscriptionFieldsService @Inject()(repository: SubscriptionF
     }
   }
 
-  def get(identifier: SubscriptionIdentifier): Future[Option[SubscriptionFieldsResponse]] = {
+  override def get(identifier: SubscriptionIdentifier): Future[Option[SubscriptionFieldsResponse]] = {
     Logger.debug(s"[get] SubscriptionIdentifier: $identifier")
     for {
-      fetch <- repository.fetchById(identifier.encode())
+      fetch <- repository.fetchById(identifier)
     } yield fetch.map(asResponse)
   }
 
-  def get(subscriptionFieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFieldsResponse]] = {
+  override def get(subscriptionFieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFieldsResponse]] = {
     Logger.debug(s"[get] SubscriptionFieldsId: $subscriptionFieldsId")
     for {
       fetch <- repository.fetchByFieldsId(subscriptionFieldsId.value)

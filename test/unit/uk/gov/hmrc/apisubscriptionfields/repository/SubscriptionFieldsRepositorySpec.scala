@@ -106,6 +106,27 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
 
   }
 
+  "fetchById using compound Id" should {
+    "retrieve the correct record for a compound Id" in {
+      val apiSubscription = createApiSubscription()
+      val isInserted = await(repository.save(apiSubscription))
+      collectionSize shouldBe 1
+      isInserted shouldBe true
+
+      await(repository.fetchById(FakeSubscriptionIdentifier)) shouldBe Some(apiSubscription)
+    }
+
+    "return `None` when the `id` doesn't match any record in the collection" in {
+      for (i <- 1 to 3) {
+        val isInserted = await(repository.save(createApiSubscription()))
+        isInserted shouldBe true
+      }
+      collectionSize shouldBe 3
+
+      await(repository.fetchById(FakeSubscriptionIdentifier.copy(applicationId = AppId("DOES_NOT_EXISTS")))) shouldBe None
+    }
+  }
+
   "fetchById" should {
     "retrieve the correct record from the `id` " in {
       val apiSubscription = createApiSubscription()
