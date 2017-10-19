@@ -85,7 +85,6 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
     }
   }
 
-  //TODO: push this up to TestData
   private def selector(s: SubscriptionFields) = {
     BSONDocument("applicationId" -> s.applicationId, "apiContext" -> s.apiContext, "apiVersion" -> s.apiVersion)
   }
@@ -132,32 +131,6 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
     }
   }
 
-  //TODO: push this up to TestData
-  private def uniqueApplicationId = {
-    UUID.randomUUID().toString
-  }
-
-  "fetchById" should {
-    "retrieve the correct record from the `id` " in {
-      val apiSubscription = createApiSubscription()
-      val isInserted = await(repository.save(apiSubscription))
-      collectionSize shouldBe 1
-      isInserted shouldBe true
-
-      await(repository.fetchById(apiSubscription.id)) shouldBe Some(apiSubscription)
-    }
-
-    "return `None` when the `id` doesn't match any record in the collection" in {
-      for (i <- 1 to 3) {
-        val isInserted = await(repository.save(createApiSubscription(applicationId = uniqueApplicationId)))
-        isInserted shouldBe true
-      }
-      collectionSize shouldBe 3
-
-      await(repository.fetchById("ID")) shouldBe None
-    }
-  }
-
   "fetchByFieldsId" should {
     "retrieve the correct record from the `fieldsId` " in {
       val apiSubscription = createApiSubscription()
@@ -176,30 +149,6 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
       collectionSize shouldBe 3
 
       await(repository.fetchByFieldsId(UUID.fromString("1-2-3-4-5"))) shouldBe None
-    }
-  }
-
-  "delete" should {
-    "remove the record with a specific id" in {
-      val apiSubscription = createApiSubscription()
-
-      val isInserted = await(repository.save(apiSubscription))
-      isInserted shouldBe true
-      collectionSize shouldBe 1
-
-      await(repository.delete(apiSubscription.id))
-      collectionSize shouldBe 0
-    }
-
-    "not alter the collection for unknown ids" in {
-      for (i <- 1 to 3) {
-        val isInserted = await(repository.save(createApiSubscription(applicationId = uniqueApplicationId)))
-        isInserted shouldBe true
-      }
-      collectionSize shouldBe 3
-
-      await(repository.delete("ID"))
-      collectionSize shouldBe 3
     }
   }
 
@@ -222,13 +171,10 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
       }
       collectionSize shouldBe 3
 
-      await(repository.delete("ID"))
+      await(repository.delete(FakeSubscriptionIdentifier.copy(applicationId = AppId("DOES_NOT_EXIST"))))
       collectionSize shouldBe 3
     }
   }
-
-  //TODO: push up to TestData
-  private def subscriptionIdentifier(apiSubscription: SubscriptionFields) = SubscriptionIdentifier(AppId(apiSubscription.applicationId), ApiContext(apiSubscription.apiContext), ApiVersion(apiSubscription.apiVersion))
 
   "collection" should {
     "have a unique index on `id` " in {

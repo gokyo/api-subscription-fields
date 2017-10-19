@@ -25,7 +25,7 @@ import play.api.libs.json.{JsObject, _}
 import reactivemongo.api.ReadPreference
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.api.indexes.IndexType
-import reactivemongo.bson.{BSONDocument, BSONObjectID}
+import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.apisubscriptionfields.model.SubscriptionIdentifier
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
@@ -40,14 +40,10 @@ trait SubscriptionFieldsRepository {
   def save(subscription: SubscriptionFields): Future[Boolean]
 
   def fetchByApplicationId(applicationId: String): Future[List[SubscriptionFields]]
-  //TODO: remove
-  def fetchById(id: String): Future[Option[SubscriptionFields]]
   def fetchById(identifier: SubscriptionIdentifier): Future[Option[SubscriptionFields]]
   def fetchByFieldsId(fieldsId: UUID): Future[Option[SubscriptionFields]]
 
   def delete(identifier: SubscriptionIdentifier): Future[Boolean]
-  //TODO: remove
-  def delete(id: String): Future[Boolean]
 }
 
 @Singleton
@@ -90,12 +86,6 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
     collection.find(selector).cursor[SubscriptionFields](ReadPreference.primary).collect[List]()
   }
 
-  override def fetchById(id: String): Future[Option[SubscriptionFields]] = {
-    val selector = selectorById(id)
-    Logger.debug(s"[fetchById] selector: $selector")
-    collection.find(selector).one[SubscriptionFields]
-  }
-
   override def fetchById(identifier: SubscriptionIdentifier): Future[Option[SubscriptionFields]] = {
     val selector = selectorForIdentifier(identifier)
     Logger.debug(s"[fetchById] selector: $selector")
@@ -122,14 +112,6 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
     val selector = Json.obj("fieldsId" -> fieldsId)
     Logger.debug(s"[fetchByFieldsId] selector: $selector")
     collection.find(selector).one[SubscriptionFields]
-  }
-
-  override def delete(id: String): Future[Boolean] = {
-    val selector = selectorById(id)
-    Logger.debug(s"[delete] selector: $selector")
-    collection.remove(selector).map {
-      writeResult => handleDeleteError(writeResult, s"Could not delete subscription fields for id: $id")
-    }
   }
 
   override def delete(identifier: SubscriptionIdentifier): Future[Boolean] = {

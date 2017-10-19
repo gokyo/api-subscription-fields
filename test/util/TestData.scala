@@ -59,6 +59,10 @@ trait SubscriptionFieldsTestData extends TestData {
     val customFields = Map("field_1" -> "value_1", "field_2" -> "value_2", "field_3" -> "value_3")
     SubscriptionFields(FakeSubscriptionIdentifier.copy(applicationId = AppId(applicationId), apiContext = ApiContext(rawContext)).encode(), applicationId, rawContext, fakeRawVersion,  UUID.randomUUID(), customFields)
   }
+
+  def subscriptionIdentifier(apiSubscription: SubscriptionFields) = SubscriptionIdentifier(AppId(apiSubscription.applicationId), ApiContext(apiSubscription.apiContext), ApiVersion(apiSubscription.apiVersion))
+
+  def uniqueApplicationId = UUID.randomUUID().toString
 }
 
 trait FieldsDefinitionTestData extends TestData {

@@ -54,7 +54,7 @@ class RepositoryFedSubscriptionFieldsServiceSpec extends UnitSpec with Subscript
     }
 
     "return None when no entry exist in the repo when get by composite id is called" in {
-      (mockSubscriptionFieldsIdRepository fetchById (_: SubscriptionIdentifier)) expects FakeSubscriptionIdentifier returns None
+      (mockSubscriptionFieldsIdRepository fetchById _) expects FakeSubscriptionIdentifier returns None
 
       val result = await(service.get(FakeSubscriptionIdentifier))
 
@@ -62,7 +62,7 @@ class RepositoryFedSubscriptionFieldsServiceSpec extends UnitSpec with Subscript
     }
 
     "return Some SubscriptionFieldsResponse when composite id is found" in {
-      (mockSubscriptionFieldsIdRepository fetchById (_: SubscriptionIdentifier)) expects FakeSubscriptionIdentifier returns Some(FakeApiSubscription)
+      (mockSubscriptionFieldsIdRepository fetchById _) expects FakeSubscriptionIdentifier returns Some(FakeApiSubscription)
 
       val result = await(service.get(FakeSubscriptionIdentifier))
 
@@ -70,7 +70,7 @@ class RepositoryFedSubscriptionFieldsServiceSpec extends UnitSpec with Subscript
     }
 
     "return Successful true when an entry exists in the repo when delete is called" in {
-      (mockSubscriptionFieldsIdRepository delete (_: String)) expects FakeSubscriptionIdentifier.encode() returns true
+      (mockSubscriptionFieldsIdRepository delete _) expects FakeSubscriptionIdentifier returns true
 
       val result: Boolean = await(service.delete(FakeSubscriptionIdentifier))
 
@@ -78,7 +78,7 @@ class RepositoryFedSubscriptionFieldsServiceSpec extends UnitSpec with Subscript
     }
 
     "return Successful false when an entry does not exist in the repo when delete is called" in {
-      (mockSubscriptionFieldsIdRepository delete (_: String)) expects FakeSubscriptionIdentifier.encode() returns false
+      (mockSubscriptionFieldsIdRepository delete _) expects FakeSubscriptionIdentifier returns false
 
       val result: Boolean = await(service.delete(FakeSubscriptionIdentifier))
 

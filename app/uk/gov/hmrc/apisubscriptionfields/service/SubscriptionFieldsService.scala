@@ -72,7 +72,7 @@ class RepositoryFedSubscriptionFieldsService @Inject()(repository: SubscriptionF
   override def delete(identifier: SubscriptionIdentifier): Future[Boolean] = {
     val id = identifier.encode()
     Logger.debug(s"[delete] SubscriptionIdentifier: $identifier")
-    repository.delete(id)
+    repository.delete(identifier)
   }
 
   override def get(appId: AppId): Future[Option[BulkSubscriptionFieldsResponse]] = {
