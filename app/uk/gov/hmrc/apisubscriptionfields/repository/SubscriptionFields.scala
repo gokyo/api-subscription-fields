@@ -21,7 +21,8 @@ import java.util.UUID
 import uk.gov.hmrc.apisubscriptionfields.model.{Fields, SubscriptionIdentifier}
 
 object SubscriptionFields {
-  def apply(id: SubscriptionIdentifier, fieldsId: UUID, fields: Fields): SubscriptionFields = new SubscriptionFields(id.encode(), id.applicationId.value, fieldsId, fields)
+  def apply(id: SubscriptionIdentifier, fieldsId: UUID, fields: Fields): SubscriptionFields =
+    new SubscriptionFields(id.encode(), id.applicationId.value, id.apiContext.value, id.apiVersion.value, fieldsId, fields)
 }
 
-case class SubscriptionFields(id: String, applicationId: String, fieldsId: UUID, customFields: Fields)
+case class SubscriptionFields(id: String, applicationId: String, apiContext: String, apiVersion: String, fieldsId: UUID, customFields: Fields)

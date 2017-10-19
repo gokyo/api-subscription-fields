@@ -51,13 +51,13 @@ trait SubscriptionFieldsTestData extends TestData {
   final val EmptyResponse: Future[Option[SubscriptionFieldsResponse]] = Future.successful(None)
   final val CustomFields = Map("A" -> "X", "B" -> "Y")
 
-  final val FakeApiSubscription = SubscriptionFields(FakeRawIdentifier, fakeRawAppId, FakeRawFieldsId, CustomFields)
+  final val FakeApiSubscription = SubscriptionFields(FakeRawIdentifier, fakeRawAppId, fakeRawContext, fakeRawVersion, FakeRawFieldsId, CustomFields)
   final val FakeSubscriptionFieldsId = SubscriptionFieldsId(FakeRawFieldsId)
   final val FakeSubscriptionFieldsResponse: SubscriptionFieldsResponse = SubscriptionFieldsResponse(FakeRawIdentifier, FakeSubscriptionFieldsId, CustomFields)
 
   def createSubscriptionFieldsWithApiContext(applicationId: String = fakeRawAppId, rawContext: String = fakeRawContext) = {
     val customFields = Map("field_1" -> "value_1", "field_2" -> "value_2", "field_3" -> "value_3")
-    SubscriptionFields(FakeSubscriptionIdentifier.copy(applicationId = AppId(applicationId), apiContext = ApiContext(rawContext)).encode(), applicationId, UUID.randomUUID(), customFields)
+    SubscriptionFields(FakeSubscriptionIdentifier.copy(applicationId = AppId(applicationId), apiContext = ApiContext(rawContext)).encode(), applicationId, rawContext, fakeRawVersion,  UUID.randomUUID(), customFields)
   }
 }
 
