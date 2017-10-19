@@ -22,7 +22,7 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import reactivemongo.api.DB
 import reactivemongo.bson.BSONDocument
-import uk.gov.hmrc.apisubscriptionfields.model.JsonFormatters
+import uk.gov.hmrc.apisubscriptionfields.model.{ApiContext, JsonFormatters}
 import uk.gov.hmrc.apisubscriptionfields.repository._
 import uk.gov.hmrc.mongo.MongoSpecSupport
 import uk.gov.hmrc.play.test.UnitSpec
@@ -59,7 +59,7 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
     await(repository.collection.count())
   }
 
-  private def createFieldsDefinition = FieldsDefinition(UUID.randomUUID().toString, FakeFieldsDefinitions)
+  private def createFieldsDefinition = FieldsDefinition(UUID.randomUUID().toString, fakeRawContext, fakeRawVersion, FakeFieldsDefinitions)
 
   private trait Setup {
     val fieldsDefinition = createFieldsDefinition
@@ -91,6 +91,26 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
       isInsertedAfterEdit shouldBe false
       val selector = BSONDocument("id" -> fieldsDefinition.id)
       await(repository.collection.find(selector).one[FieldsDefinition]) shouldBe Some(edited)
+    }
+  }
+
+  "fetchById with compound id" should {
+    "retrieve the correct record from the `id` " in new Setup {
+      val isInsertedAfterInsert = await(repository.save(fieldsDefinition))
+      collectionSize shouldBe 1
+      isInsertedAfterInsert shouldBe true
+
+      await(repository.fetchById(FakeFieldsDefinitionIdentifier)) shouldBe Some(fieldsDefinition)
+    }
+
+    "return `None` when the `id` doesn't match any record in the collection" in {
+      for (i <- 1 to 3) {
+        val isInsertedAfterInsert = await(repository.save(createFieldsDefinition))
+        isInsertedAfterInsert shouldBe true
+      }
+      collectionSize shouldBe 3
+
+      await(repository.fetchById(FakeFieldsDefinitionIdentifier.copy(apiContext = ApiContext("CONTEXT_DOES_NOT_EXIST")))) shouldBe None
     }
   }
 

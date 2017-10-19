@@ -25,4 +25,4 @@ object SubscriptionFields {
     new SubscriptionFields(id.encode(), id.applicationId.value, id.apiContext.value, id.apiVersion.value, fieldsId, fields)
 }
 
-case class SubscriptionFields(id: String, applicationId: String, apiContext: String, apiVersion: String, fieldsId: UUID, customFields: Fields)
+case class SubscriptionFields(/* TODO: remove id */ id: String, applicationId: String, apiContext: String, apiVersion: String, fieldsId: UUID, customFields: Fields)

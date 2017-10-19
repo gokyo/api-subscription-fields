@@ -67,7 +67,7 @@ trait FieldsDefinitionTestData extends TestData {
   final val FakeFieldDefinitionString = FieldDefinition("name2", "desc2", FieldDefinitionType.STRING)
   final val FakeFieldDefinitionSecureToken = FieldDefinition("name3", "desc3", FieldDefinitionType.SECURE_TOKEN)
   final val FakeFieldsDefinitions = Seq(FakeFieldDefinitionUrl, FakeFieldDefinitionString, FakeFieldDefinitionSecureToken)
-  final val FakeFieldsDefinition = FieldsDefinition(FakeFieldsDefinitionIdentifier.encode(), FakeFieldsDefinitions)
+  final val FakeFieldsDefinition = FieldsDefinition(FakeFieldsDefinitionIdentifier.encode(), fakeRawContext, fakeRawVersion, FakeFieldsDefinitions)
   final val FakeFieldsDefinitionResponse = FieldsDefinitionResponse(FakeFieldsDefinition.fields)
 }
 

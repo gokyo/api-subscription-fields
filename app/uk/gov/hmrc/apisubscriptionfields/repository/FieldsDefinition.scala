@@ -19,7 +19,8 @@ package uk.gov.hmrc.apisubscriptionfields.repository
 import uk.gov.hmrc.apisubscriptionfields.model.{FieldDefinition, FieldsDefinitionIdentifier}
 
 object FieldsDefinition {
-  def apply(id: FieldsDefinitionIdentifier, fields: Seq[FieldDefinition]) : FieldsDefinition = FieldsDefinition(id, fields)
+  def apply(id: FieldsDefinitionIdentifier, fields: Seq[FieldDefinition]) : FieldsDefinition =
+    new FieldsDefinition(id.encode(), id.apiContext.value, id.apiVersion.value, fields)
 }
 
-case class FieldsDefinition(id: String, fields: Seq[FieldDefinition])
+case class FieldsDefinition(/* TODO: remove id */ id: String, apiContext: String, apiVersion: String, fields: Seq[FieldDefinition])

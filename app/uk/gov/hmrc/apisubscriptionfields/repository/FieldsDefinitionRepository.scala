@@ -22,9 +22,9 @@ import com.google.inject.ImplementedBy
 import play.api.Logger
 import play.api.libs.json._
 import reactivemongo.api.commands.WriteResult
-import reactivemongo.api.indexes.Index
-import reactivemongo.api.indexes.IndexType.Ascending
+import reactivemongo.api.indexes.IndexType
 import reactivemongo.bson.{BSONDocument, BSONObjectID}
+import uk.gov.hmrc.apisubscriptionfields.model.FieldsDefinitionIdentifier
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
@@ -37,6 +37,9 @@ trait FieldsDefinitionRepository {
 
   def save(fieldsDefinition: FieldsDefinition): Future[Boolean]
 
+  def fetchById(identifier: FieldsDefinitionIdentifier): Future[Option[FieldsDefinition]]
+
+  //TODO: remove
   def fetchById(id: String): Future[Option[FieldsDefinition]]
 }
 
@@ -44,26 +47,22 @@ trait FieldsDefinitionRepository {
 class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider)
   extends ReactiveRepository[FieldsDefinition, BSONObjectID]("fieldsDefinitions", mongoDbProvider.mongo,
     MongoFormatters.FieldsDefinitionJF, ReactiveMongoFormats.objectIdFormats)
-  with FieldsDefinitionRepository {
+  with FieldsDefinitionRepository
+  with MongoIndexCreator {
 
   private implicit val format = MongoFormatters.FieldsDefinitionJF
 
   override def indexes = Seq(
-    createSingleFieldAscendingIndex(
-      indexFieldKey = "id",
+    createCompoundIndex(
+      indexFieldMappings = Seq(
+        "apiContext" -> IndexType.Ascending,
+        "apiVersion" -> IndexType.Ascending
+      ),
       indexName = Some("idIndex")
     )
   )
 
-  private def createSingleFieldAscendingIndex(indexFieldKey: String, indexName: Option[String],
-                                              isUnique: Boolean = false, isBackground: Boolean = true): Index = {
-    Index(
-      key = Seq(indexFieldKey -> Ascending),
-      name = indexName,
-      unique = isUnique,
-      background = isBackground
-    )
-  }
+
 
   override def fetchById(id: String): Future[Option[FieldsDefinition]] = {
     val selector = selectorById(id)
@@ -71,7 +70,17 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
     collection.find(selector).one[FieldsDefinition]
   }
 
-  def save(fieldsDefinition: FieldsDefinition): Future[Boolean] = {
+  override def fetchById(identifier: FieldsDefinitionIdentifier): Future[Option[FieldsDefinition]] = {
+    val selector = Json.obj(
+      "apiContext" -> identifier.apiContext.value,
+      "apiVersion" -> identifier.apiVersion.value
+    )
+    Logger.debug(s"[fetchById] selector: $selector")
+    collection.find(selector).one[FieldsDefinition]
+  }
+
+
+  override def save(fieldsDefinition: FieldsDefinition): Future[Boolean] = {
     collection.update(selector = BSONDocument("id" -> fieldsDefinition.id), update = fieldsDefinition, upsert = true).map {
       updateWriteResult => handleError(updateWriteResult, s"Could not save fields definition fields: $fieldsDefinition", updateWriteResult.upserted.nonEmpty)
     }

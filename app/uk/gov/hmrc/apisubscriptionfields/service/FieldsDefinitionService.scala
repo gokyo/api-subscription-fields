@@ -31,13 +31,13 @@ class FieldsDefinitionService @Inject() (repository: FieldsDefinitionRepository)
   def upsert(identifier: FieldsDefinitionIdentifier, fields: Seq[FieldDefinition]): Future[Boolean] = {
     Logger.debug(s"[upsert] FieldsDefinitionIdentifier: $identifier")
 
-    repository.save(FieldsDefinition(identifier.encode(), fields))
+    repository.save(FieldsDefinition(identifier.encode(), identifier.apiContext.value, identifier.apiVersion.value, fields))
   }
 
   def get(identifier: FieldsDefinitionIdentifier): Future[Option[FieldsDefinitionResponse]] = {
     Logger.debug(s"[get] FieldsDefinitionIdentifier: $identifier")
     for {
-      fetch <- repository.fetchById(identifier.encode())
+      fetch <- repository.fetchById(identifier)
     } yield fetch.map(asResponse)
   }
 
