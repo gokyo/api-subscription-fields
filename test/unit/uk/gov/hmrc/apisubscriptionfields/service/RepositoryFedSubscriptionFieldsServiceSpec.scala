@@ -70,7 +70,7 @@ class RepositoryFedSubscriptionFieldsServiceSpec extends UnitSpec with Subscript
     }
 
     "return Successful true when an entry exists in the repo when delete is called" in {
-      (mockSubscriptionFieldsIdRepository delete _) expects FakeSubscriptionIdentifier.encode() returns true
+      (mockSubscriptionFieldsIdRepository delete (_: String)) expects FakeSubscriptionIdentifier.encode() returns true
 
       val result: Boolean = await(service.delete(FakeSubscriptionIdentifier))
 
@@ -78,7 +78,7 @@ class RepositoryFedSubscriptionFieldsServiceSpec extends UnitSpec with Subscript
     }
 
     "return Successful false when an entry does not exist in the repo when delete is called" in {
-      (mockSubscriptionFieldsIdRepository delete _) expects FakeSubscriptionIdentifier.encode() returns false
+      (mockSubscriptionFieldsIdRepository delete (_: String)) expects FakeSubscriptionIdentifier.encode() returns false
 
       val result: Boolean = await(service.delete(FakeSubscriptionIdentifier))
 
