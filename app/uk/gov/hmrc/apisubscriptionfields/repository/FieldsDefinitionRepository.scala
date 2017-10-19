@@ -72,7 +72,7 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
   }
 
   def upsert(fieldsDefinition: FieldsDefinition): Future[Boolean] = {
-    collection.update(selector = BSONDocument("_id" -> fieldsDefinition.id), update = fieldsDefinition, upsert = true).map {
+    collection.update(selector = BSONDocument("id" -> fieldsDefinition.id), update = fieldsDefinition, upsert = true).map {
       updateWriteResult => handleError(updateWriteResult, "", updateWriteResult.upserted.nonEmpty)
     }
   }

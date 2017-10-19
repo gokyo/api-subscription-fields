@@ -80,7 +80,7 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
   }
 
   override def upsert(subscription: SubscriptionFields): Future[Boolean] = {
-    collection.update(selector = BSONDocument("_id" -> subscription.id), update = subscription, upsert = true).map {
+    collection.update(selector = BSONDocument("id" -> subscription.id), update = subscription, upsert = true).map {
       updateWriteResult => handleUpsertError(updateWriteResult, s"Could not save subscription fields: $subscription", updateWriteResult.upserted.nonEmpty)
     }
   }
