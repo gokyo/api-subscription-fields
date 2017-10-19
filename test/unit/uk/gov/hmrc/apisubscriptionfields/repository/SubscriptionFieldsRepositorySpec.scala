@@ -75,7 +75,7 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
     "insert the record in the collection" in {
       collectionSize shouldBe 0
       val apiSubscription = createApiSubscription()
-      val isInserted = await(repository.upsert(apiSubscription))
+      val isInserted = await(repository.save(apiSubscription))
       collectionSize shouldBe 1
       isInserted shouldBe true
 
@@ -91,9 +91,9 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
       val apiSubForApp1Context1 = createSubscriptionFieldsWithApiContext()
       val apiSubForApp1Context2 = createSubscriptionFieldsWithApiContext(rawContext = fakeRawContext2)
       val apiSubForApp2Context1 = createSubscriptionFieldsWithApiContext(applicationId = fakeRawAppId2)
-      await(repository.upsert(apiSubForApp1Context1))
-      await(repository.upsert(apiSubForApp1Context2))
-      await(repository.upsert(apiSubForApp2Context1))
+      await(repository.save(apiSubForApp1Context1))
+      await(repository.save(apiSubForApp1Context2))
+      await(repository.save(apiSubForApp2Context1))
       collectionSize shouldBe 3
 
       await(repository.fetchByApplicationId(fakeRawAppId)) shouldBe List(apiSubForApp1Context1, apiSubForApp1Context2)
@@ -109,7 +109,7 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
   "fetchById" should {
     "retrieve the correct record from the `id` " in {
       val apiSubscription = createApiSubscription()
-      val isInserted = await(repository.upsert(apiSubscription))
+      val isInserted = await(repository.save(apiSubscription))
       collectionSize shouldBe 1
       isInserted shouldBe true
 
@@ -118,7 +118,7 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
 
     "return `None` when the `id` doesn't match any record in the collection" in {
       for (i <- 1 to 3) {
-        val isInserted = await(repository.upsert(createApiSubscription()))
+        val isInserted = await(repository.save(createApiSubscription()))
         isInserted shouldBe true
       }
       collectionSize shouldBe 3
@@ -130,7 +130,7 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
   "fetchByFieldsId" should {
     "retrieve the correct record from the `fieldsId` " in {
       val apiSubscription = createApiSubscription()
-      val isInserted = await(repository.upsert(apiSubscription))
+      val isInserted = await(repository.save(apiSubscription))
       isInserted shouldBe true
       collectionSize shouldBe 1
 
@@ -139,7 +139,7 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
 
     "return `None` when the `fieldsId` doesn't match any record in the collection" in {
       for (i <- 1 to 3) {
-        val isInserted = await(repository.upsert(createApiSubscription()))
+        val isInserted = await(repository.save(createApiSubscription()))
         isInserted shouldBe true
       }
       collectionSize shouldBe 3
@@ -152,7 +152,7 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
     "remove the record with a specific id" in {
       val apiSubscription = createApiSubscription()
 
-      val isInserted = await(repository.upsert(apiSubscription))
+      val isInserted = await(repository.save(apiSubscription))
       isInserted shouldBe true
       collectionSize shouldBe 1
 
@@ -162,7 +162,7 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
 
     "not alter the collection for unknown ids" in {
       for (i <- 1 to 3) {
-        val isInserted = await(repository.upsert(createApiSubscription()))
+        val isInserted = await(repository.save(createApiSubscription()))
         isInserted shouldBe true
       }
       collectionSize shouldBe 3
@@ -176,11 +176,11 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
     "have a unique index on `id` " in {
       val apiSubscription = createApiSubscription()
 
-      val isInsertedAfterInsert = await(repository.upsert(apiSubscription))
+      val isInsertedAfterInsert = await(repository.save(apiSubscription))
       isInsertedAfterInsert shouldBe true
       collectionSize shouldBe 1
 
-      val isInsertedAfterEdit = await(repository.upsert(apiSubscription.copy(fieldsId = UUID.randomUUID())))
+      val isInsertedAfterEdit = await(repository.save(apiSubscription.copy(fieldsId = UUID.randomUUID())))
       isInsertedAfterEdit shouldBe false
       collectionSize shouldBe 1
     }

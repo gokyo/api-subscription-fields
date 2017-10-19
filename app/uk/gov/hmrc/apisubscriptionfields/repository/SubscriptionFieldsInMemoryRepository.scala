@@ -25,7 +25,7 @@ class SubscriptionFieldsInMemoryRepository extends SubscriptionFieldsRepository 
   private[this] var values: Map[String, SubscriptionFields] = Map()
   private[this] var altKey: Map[UUID, String] = Map()
 
-  override def upsert(subscription: SubscriptionFields): Future[Boolean] = {
+  override def save(subscription: SubscriptionFields): Future[Boolean] = {
     val isInserted = values.contains(subscription.id)
     values = values + ((subscription.id, subscription))
     altKey = altKey + ((subscription.fieldsId, subscription.id))

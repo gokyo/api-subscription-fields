@@ -101,7 +101,7 @@ class RepositoryFedSubscriptionFieldsService @Inject()(repository: SubscriptionF
 
   private def save(apiSubscription: SubscriptionFields): Future[SubscriptionFieldsResponse] = {
     Logger.debug(s"[save] SubscriptionFields: $apiSubscription")
-    repository.upsert(apiSubscription) map {
+    repository.save(apiSubscription) map {
       _ => SubscriptionFieldsResponse(apiSubscription.id, SubscriptionFieldsId(apiSubscription.fieldsId), apiSubscription.customFields)
     }
   }

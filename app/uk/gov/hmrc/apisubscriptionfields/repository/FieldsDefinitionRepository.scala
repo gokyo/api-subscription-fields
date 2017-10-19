@@ -35,7 +35,7 @@ import scala.concurrent.Future
 @ImplementedBy(classOf[FieldsDefinitionMongoRepository])
 trait FieldsDefinitionRepository {
 
-  def upsert(fieldsDefinition: FieldsDefinition): Future[Boolean]
+  def save(fieldsDefinition: FieldsDefinition): Future[Boolean]
 
   def fetchById(id: String): Future[Option[FieldsDefinition]]
 }
@@ -71,9 +71,9 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
     collection.find(selector).one[FieldsDefinition]
   }
 
-  def upsert(fieldsDefinition: FieldsDefinition): Future[Boolean] = {
+  def save(fieldsDefinition: FieldsDefinition): Future[Boolean] = {
     collection.update(selector = BSONDocument("id" -> fieldsDefinition.id), update = fieldsDefinition, upsert = true).map {
-      updateWriteResult => handleError(updateWriteResult, "", updateWriteResult.upserted.nonEmpty)
+      updateWriteResult => handleError(updateWriteResult, s"Could not save fields definition fields: $fieldsDefinition", updateWriteResult.upserted.nonEmpty)
     }
   }
 

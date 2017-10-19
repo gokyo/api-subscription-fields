@@ -37,7 +37,7 @@ import scala.concurrent.Future
 @ImplementedBy(classOf[SubscriptionFieldsMongoRepository])
 trait SubscriptionFieldsRepository {
 
-  def upsert(subscription: SubscriptionFields): Future[Boolean]
+  def save(subscription: SubscriptionFields): Future[Boolean]
 
   def fetchByApplicationId(applicationId: String): Future[List[SubscriptionFields]]
   def fetchById(id: String): Future[Option[SubscriptionFields]]
@@ -79,7 +79,7 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
     )
   }
 
-  override def upsert(subscription: SubscriptionFields): Future[Boolean] = {
+  override def save(subscription: SubscriptionFields): Future[Boolean] = {
     collection.update(selector = BSONDocument("id" -> subscription.id), update = subscription, upsert = true).map {
       updateWriteResult => handleUpsertError(updateWriteResult, s"Could not save subscription fields: $subscription", updateWriteResult.upserted.nonEmpty)
     }
