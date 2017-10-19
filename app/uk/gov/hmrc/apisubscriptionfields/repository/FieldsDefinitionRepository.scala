@@ -35,11 +35,6 @@ import scala.concurrent.Future
 @ImplementedBy(classOf[FieldsDefinitionMongoRepository])
 trait FieldsDefinitionRepository {
 
-  /**
-    * Saves or inserts entity depending on if it already exists.
-    * Returns Future of isInserted Boolean flag if everything went OK - otherwise a failed Future with an error message.
-    * @param fieldsDefinition entity to upsert
-    */
   def upsert(fieldsDefinition: FieldsDefinition): Future[Boolean]
 
   def fetchById(id: String): Future[Option[FieldsDefinition]]
@@ -76,11 +71,6 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
     collection.find(selector).one[FieldsDefinition]
   }
 
-  /**
-    * Saves or inserts entity depending on if it already exists.
-    * Returns Future of isInserted Boolean flag if everything went OK - otherwise a failed Future with an error message.
-    * @param fieldsDefinition entity to upsert
-    */
   def upsert(fieldsDefinition: FieldsDefinition): Future[Boolean] = {
     collection.update(selector = BSONDocument("_id" -> fieldsDefinition.id), update = fieldsDefinition, upsert = true).map {
       updateWriteResult => handleError(updateWriteResult, "", updateWriteResult.upserted.nonEmpty)

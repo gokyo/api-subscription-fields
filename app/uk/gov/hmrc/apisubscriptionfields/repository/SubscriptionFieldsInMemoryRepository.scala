@@ -21,7 +21,7 @@ import java.util.UUID
 import scala.concurrent.Future
 
 //TODO we think this should be removed
-class InMemoryRepository extends SubscriptionFieldsRepository {
+class SubscriptionFieldsInMemoryRepository extends SubscriptionFieldsRepository {
   private[this] var values: Map[String, SubscriptionFields] = Map()
   private[this] var altKey: Map[UUID, String] = Map()
 

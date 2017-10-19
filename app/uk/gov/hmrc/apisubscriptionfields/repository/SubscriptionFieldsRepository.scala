@@ -37,11 +37,6 @@ import scala.concurrent.Future
 @ImplementedBy(classOf[SubscriptionFieldsMongoRepository])
 trait SubscriptionFieldsRepository {
 
-  /**
-    * Saves or inserts entity depending on if it already exists.
-    * Returns Future of isInserted Boolean flag if everything went OK - otherwise a failed Future with an error message.
-    * @param subscription entity to upsert
-    */
   def upsert(subscription: SubscriptionFields): Future[Boolean]
 
   def fetchByApplicationId(applicationId: String): Future[List[SubscriptionFields]]
@@ -84,18 +79,13 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
     )
   }
 
-  /**
-    * Saves or inserts entity depending on if it already exists.
-    * Returns Future of isInserted Boolean flag if everything went OK - otherwise a failed Future with an error message.
-    * @param subscription entity to upsert
-    */
-  def upsert(subscription: SubscriptionFields): Future[Boolean] = {
+  override def upsert(subscription: SubscriptionFields): Future[Boolean] = {
     collection.update(selector = BSONDocument("_id" -> subscription.id), update = subscription, upsert = true).map {
       updateWriteResult => handleUpsertError(updateWriteResult, s"Could not save subscription fields: $subscription", updateWriteResult.upserted.nonEmpty)
     }
   }
 
-  def fetchByApplicationId(applicationId: String): Future[List[SubscriptionFields]] = {
+  override def fetchByApplicationId(applicationId: String): Future[List[SubscriptionFields]] = {
     val selector = Json.obj("applicationId" -> applicationId)
     Logger.debug(s"[fetchByApplicationId] selector: $selector")
     collection.find(selector).cursor[SubscriptionFields](ReadPreference.primary).collect[List]()

@@ -31,7 +31,7 @@ class FieldsDefinitionService @Inject() (repository: FieldsDefinitionRepository)
   def upsert(identifier: FieldsDefinitionIdentifier, fields: Seq[FieldDefinition]): Future[Boolean] = {
     Logger.debug(s"[upsert] FieldsDefinitionIdentifier: $identifier")
 
-    repository.upsert(FieldsDefinition(identifier.encode(), fields)) map (isInserted => isInserted)
+    repository.upsert(FieldsDefinition(identifier.encode(), fields))
   }
 
   def get(identifier: FieldsDefinitionIdentifier): Future[Option[FieldsDefinitionResponse]] = {

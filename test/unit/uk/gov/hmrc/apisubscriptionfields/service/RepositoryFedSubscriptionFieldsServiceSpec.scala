@@ -20,7 +20,7 @@ import java.util.UUID
 
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.apisubscriptionfields.model.{BulkSubscriptionFieldsResponse, SubscriptionFieldsId, SubscriptionFieldsResponse}
-import uk.gov.hmrc.apisubscriptionfields.repository.{InMemoryRepository, SubscriptionFields, SubscriptionFieldsRepository}
+import uk.gov.hmrc.apisubscriptionfields.repository.{SubscriptionFieldsInMemoryRepository, SubscriptionFields, SubscriptionFieldsRepository}
 import uk.gov.hmrc.apisubscriptionfields.service.{RepositoryFedSubscriptionFieldsService, UUIDCreator}
 import uk.gov.hmrc.play.test.UnitSpec
 import util.SubscriptionFieldsTestData
@@ -124,7 +124,7 @@ class RepositoryFedSubscriptionFieldsServiceSpec extends UnitSpec with Subscript
 
     val uuids: Seq[UUID] = (1 to 10).map(_ => UUID.randomUUID())
 
-    val service = new RepositoryFedSubscriptionFieldsService(new InMemoryRepository, new ListOfUUIDS(uuids))
+    val service = new RepositoryFedSubscriptionFieldsService(new SubscriptionFieldsInMemoryRepository, new ListOfUUIDS(uuids))
     val saveExpectation = SubscriptionFields(FakeRawIdentifier, fakeRawAppId, uuids.head, CustomFields)
     val updateExpectation = SubscriptionFields(FakeRawIdentifier, fakeRawAppId, uuids.head, SomeOtherFields)
 

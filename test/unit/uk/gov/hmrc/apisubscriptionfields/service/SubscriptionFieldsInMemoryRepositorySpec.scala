@@ -19,12 +19,12 @@ package unit.uk.gov.hmrc.apisubscriptionfields.service
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 
-import uk.gov.hmrc.apisubscriptionfields.repository.{InMemoryRepository, MongoFormatters, SubscriptionFields}
+import uk.gov.hmrc.apisubscriptionfields.repository.{SubscriptionFieldsInMemoryRepository, MongoFormatters, SubscriptionFields}
 
 import scala.concurrent.Await
 import scala.concurrent.duration.FiniteDuration
 
-class InMemoryRepositorySpec extends org.scalatest.WordSpec with org.scalatest.Matchers with org.scalatest.OptionValues with MongoFormatters {
+class SubscriptionFieldsInMemoryRepositorySpec extends org.scalatest.WordSpec with org.scalatest.Matchers with org.scalatest.OptionValues with MongoFormatters {
   private val FakeApplicaionIdentifier: String = "12345"
   private val AltFakeApplicaionIdentifier: String = "98765"
 
@@ -37,7 +37,7 @@ class InMemoryRepositorySpec extends org.scalatest.WordSpec with org.scalatest.M
 
 
   "InMemoryRepository" should {
-    val repo = new InMemoryRepository
+    val repo = new SubscriptionFieldsInMemoryRepository
     implicit val timeout = FiniteDuration(1,TimeUnit.SECONDS)
 
     def validateIsPresent(key: String): SubscriptionFields = {
