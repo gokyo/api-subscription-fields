@@ -59,7 +59,7 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
     await(repository.collection.count())
   }
 
-  private def createFieldsDefinition = FieldsDefinition(UUID.randomUUID().toString, fakeRawContext, fakeRawVersion, FakeFieldsDefinitions)
+  private def createFieldsDefinition = FieldsDefinition(fakeRawContext, fakeRawVersion, FakeFieldsDefinitions)
 
   private trait Setup {
     val fieldsDefinition = createFieldsDefinition
@@ -74,8 +74,7 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
       import reactivemongo.json._
 
       isInsertedAfterInsert shouldBe true
-      val selector = BSONDocument("id" -> fieldsDefinition.id)
-      await(repository.collection.find(selector).one[FieldsDefinition]) shouldBe Some(fieldsDefinition)
+      await(repository.collection.find(selector(fieldsDefinition)).one[FieldsDefinition]) shouldBe Some(fieldsDefinition)
     }
 
     "update the record in the collection" in new Setup {
@@ -89,8 +88,7 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
       val isInsertedAfterEdit = await(repository.save(edited))
 
       isInsertedAfterEdit shouldBe false
-      val selector = BSONDocument("id" -> fieldsDefinition.id)
-      await(repository.collection.find(selector).one[FieldsDefinition]) shouldBe Some(edited)
+      await(repository.collection.find(selector(edited)).one[FieldsDefinition]) shouldBe Some(edited)
     }
   }
 
@@ -105,32 +103,12 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
 
     "return `None` when the `id` doesn't match any record in the collection" in {
       for (i <- 1 to 3) {
-        val isInsertedAfterInsert = await(repository.save(createFieldsDefinition))
+        val isInsertedAfterInsert = await(repository.save(createFieldsDefinition(apiContext = uniqueApiContext)))
         isInsertedAfterInsert shouldBe true
       }
       collectionSize shouldBe 3
 
       await(repository.fetchById(FakeFieldsDefinitionIdentifier.copy(apiContext = ApiContext("CONTEXT_DOES_NOT_EXIST")))) shouldBe None
-    }
-  }
-
-  "fetchById" should {
-    "retrieve the correct record from the `id` " in new Setup {
-      val isInsertedAfterInsert = await(repository.save(fieldsDefinition))
-      collectionSize shouldBe 1
-      isInsertedAfterInsert shouldBe true
-
-      await(repository.fetchById(fieldsDefinition.id)) shouldBe Some(fieldsDefinition)
-    }
-
-    "return `None` when the `id` doesn't match any record in the collection" in {
-      for (i <- 1 to 3) {
-        val isInsertedAfterInsert = await(repository.save(createFieldsDefinition))
-        isInsertedAfterInsert shouldBe true
-      }
-      collectionSize shouldBe 3
-
-      await(repository.fetchById("ID")) shouldBe None
     }
   }
 
@@ -145,6 +123,10 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
       isInsertedAfterEdit shouldBe false
       collectionSize shouldBe 1
     }
+  }
+
+  private def selector(fd: FieldsDefinition) = {
+    BSONDocument("apiContext" -> fd.apiContext, "apiVersion" -> fd.apiVersion)
   }
 
 }

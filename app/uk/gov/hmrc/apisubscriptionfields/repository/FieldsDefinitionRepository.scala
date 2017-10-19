@@ -23,7 +23,7 @@ import play.api.Logger
 import play.api.libs.json._
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.api.indexes.IndexType
-import reactivemongo.bson.{BSONDocument, BSONObjectID}
+import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.apisubscriptionfields.model.FieldsDefinitionIdentifier
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
@@ -39,8 +39,6 @@ trait FieldsDefinitionRepository {
 
   def fetchById(identifier: FieldsDefinitionIdentifier): Future[Option[FieldsDefinition]]
 
-  //TODO: remove
-  def fetchById(id: String): Future[Option[FieldsDefinition]]
 }
 
 @Singleton
@@ -62,14 +60,6 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
     )
   )
 
-
-
-  override def fetchById(id: String): Future[Option[FieldsDefinition]] = {
-    val selector = selectorById(id)
-    Logger.debug(s"[fetchById] selector: $selector")
-    collection.find(selector).one[FieldsDefinition]
-  }
-
   override def fetchById(identifier: FieldsDefinitionIdentifier): Future[Option[FieldsDefinition]] = {
     val selector = Json.obj(
       "apiContext" -> identifier.apiContext.value,
@@ -79,11 +69,21 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
     collection.find(selector).one[FieldsDefinition]
   }
 
-
   override def save(fieldsDefinition: FieldsDefinition): Future[Boolean] = {
-    collection.update(selector = BSONDocument("id" -> fieldsDefinition.id), update = fieldsDefinition, upsert = true).map {
+    collection.update(selector = selectorForIdentifier(fieldsDefinition), update = fieldsDefinition, upsert = true).map {
       updateWriteResult => handleError(updateWriteResult, s"Could not save fields definition fields: $fieldsDefinition", updateWriteResult.upserted.nonEmpty)
     }
+  }
+
+  private def selectorForIdentifier(fd: FieldsDefinition): JsObject = {
+    selectorForIdentifier(fd.apiContext, fd.apiVersion)
+  }
+
+  private def selectorForIdentifier(apiContext: String, apiVersion: String): JsObject = {
+    Json.obj(
+      "apiContext" -> apiContext,
+      "apiVersion" -> apiVersion
+    )
   }
 
   private def handleError(result: WriteResult, exceptionMsg: => String, isInserted: Boolean): Boolean = {
@@ -104,7 +104,5 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
       }
     }
   }
-
-  private def selectorById(id: String) = Json.obj("id" -> id)
 
 }

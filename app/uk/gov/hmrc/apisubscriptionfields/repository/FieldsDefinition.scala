@@ -20,7 +20,7 @@ import uk.gov.hmrc.apisubscriptionfields.model.{FieldDefinition, FieldsDefinitio
 
 object FieldsDefinition {
   def apply(id: FieldsDefinitionIdentifier, fields: Seq[FieldDefinition]) : FieldsDefinition =
-    new FieldsDefinition(id.encode(), id.apiContext.value, id.apiVersion.value, fields)
+    new FieldsDefinition(id.apiContext.value, id.apiVersion.value, fields)
 }
 
-case class FieldsDefinition(/* TODO: remove id */ id: String, apiContext: String, apiVersion: String, fields: Seq[FieldDefinition])
+case class FieldsDefinition(apiContext: String, apiVersion: String, fields: Seq[FieldDefinition])
