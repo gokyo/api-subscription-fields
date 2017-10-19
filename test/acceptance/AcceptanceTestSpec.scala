@@ -41,11 +41,11 @@ trait AcceptanceTestSpec extends FeatureSpec
     .withHeaders(RequestHeaders.ACCEPT_HMRC_JSON_HEADER)
 
   protected def idEndpoint(appId: String, apiContext: String, apiVersion: String) =
-    s"/field/application/$appId/context/$apiContext/version/$apiVersion"
+    s"/field/application/$appId/api-context/$apiContext/version/$apiVersion"
 
   protected def appIdEndpoint(appId: String) = s"/field/application/$appId"
 
-  protected def definitionEndpoint(apiContext: String, apiVersion: String) = s"/definition/context/$apiContext/version/$apiVersion"
+  protected def definitionEndpoint(apiContext: String, apiVersion: String) = s"/definition/api-context/$apiContext/version/$apiVersion"
 
   protected def fieldsIdEndpoint(fieldsId: UUID) = s"/field/$fieldsId"
 
