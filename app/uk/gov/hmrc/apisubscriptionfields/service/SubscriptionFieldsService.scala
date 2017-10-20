@@ -19,7 +19,6 @@ package uk.gov.hmrc.apisubscriptionfields.service
 import java.util.UUID
 import javax.inject._
 
-import com.google.inject.ImplementedBy
 import play.api.Logger
 import uk.gov.hmrc.apisubscriptionfields.model._
 import uk.gov.hmrc.apisubscriptionfields.repository.{SubscriptionFields, SubscriptionFieldsRepository}
@@ -27,28 +26,14 @@ import uk.gov.hmrc.apisubscriptionfields.repository.{SubscriptionFields, Subscri
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-//TODO: look at flattening this into just the class
-@ImplementedBy(classOf[RepositoryFedSubscriptionFieldsService])
-trait SubscriptionFieldsService {
-  def get(identifier: SubscriptionIdentifier): Future[Option[SubscriptionFieldsResponse]]
-
-  def get(subscriptionFieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFieldsResponse]]
-
-  def get(appId: AppId): Future[Option[BulkSubscriptionFieldsResponse]]
-
-  def upsert(identifier: SubscriptionIdentifier, subscriptionFields: Fields): Future[(SubscriptionFieldsResponse, Boolean)]
-
-  def delete(identifier: SubscriptionIdentifier): Future[Boolean]
-}
-
 @Singleton
 class UUIDCreator {
   def uuid(): UUID = UUID.randomUUID()
 }
 
 @Singleton
-class RepositoryFedSubscriptionFieldsService @Inject()(repository: SubscriptionFieldsRepository,
-                                                       uuidCreator: UUIDCreator) extends SubscriptionFieldsService {
+class SubscriptionFieldsService @Inject()(repository: SubscriptionFieldsRepository,
+                                          uuidCreator: UUIDCreator) {
 
   def upsert(identifier: SubscriptionIdentifier, subscriptionFields: Fields): Future[(SubscriptionFieldsResponse, Boolean)] = {
     def update(existingFieldsId: UUID): Future[SubscriptionFieldsResponse] =
@@ -69,12 +54,12 @@ class RepositoryFedSubscriptionFieldsService @Inject()(repository: SubscriptionF
     }
   }
 
-  override def delete(identifier: SubscriptionIdentifier): Future[Boolean] = {
+  def delete(identifier: SubscriptionIdentifier): Future[Boolean] = {
     Logger.debug(s"[delete] SubscriptionIdentifier: $identifier")
     repository.delete(identifier)
   }
 
-  override def get(appId: AppId): Future[Option[BulkSubscriptionFieldsResponse]] = {
+  def get(appId: AppId): Future[Option[BulkSubscriptionFieldsResponse]] = {
     Logger.debug(s"[get] AppId: $appId")
     (for {
       list <- repository.fetchByApplicationId(appId.value)
@@ -84,14 +69,14 @@ class RepositoryFedSubscriptionFieldsService @Inject()(repository: SubscriptionF
     }
   }
 
-  override def get(identifier: SubscriptionIdentifier): Future[Option[SubscriptionFieldsResponse]] = {
+  def get(identifier: SubscriptionIdentifier): Future[Option[SubscriptionFieldsResponse]] = {
     Logger.debug(s"[get] SubscriptionIdentifier: $identifier")
     for {
       fetch <- repository.fetchById(identifier)
     } yield fetch.map(asResponse)
   }
 
-  override def get(subscriptionFieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFieldsResponse]] = {
+  def get(subscriptionFieldsId: SubscriptionFieldsId): Future[Option[SubscriptionFieldsResponse]] = {
     Logger.debug(s"[get] SubscriptionFieldsId: $subscriptionFieldsId")
     for {
       fetch <- repository.fetchByFieldsId(subscriptionFieldsId.value)

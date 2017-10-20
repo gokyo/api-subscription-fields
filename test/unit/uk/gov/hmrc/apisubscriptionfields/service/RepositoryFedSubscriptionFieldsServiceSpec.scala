@@ -19,7 +19,7 @@ package unit.uk.gov.hmrc.apisubscriptionfields.service
 import org.scalamock.scalatest.MockFactory
 import uk.gov.hmrc.apisubscriptionfields.model.{BulkSubscriptionFieldsResponse, SubscriptionFieldsId, SubscriptionFieldsResponse, SubscriptionIdentifier}
 import uk.gov.hmrc.apisubscriptionfields.repository.SubscriptionFieldsRepository
-import uk.gov.hmrc.apisubscriptionfields.service.{RepositoryFedSubscriptionFieldsService, UUIDCreator}
+import uk.gov.hmrc.apisubscriptionfields.service.{SubscriptionFieldsService, UUIDCreator}
 import uk.gov.hmrc.play.test.UnitSpec
 import util.SubscriptionFieldsTestData
 
@@ -27,7 +27,7 @@ class RepositoryFedSubscriptionFieldsServiceSpec extends UnitSpec with Subscript
 
   private val mockSubscriptionFieldsIdRepository = mock[SubscriptionFieldsRepository]
   private val mockUuidCreator = mock[UUIDCreator]
-  private val service = new RepositoryFedSubscriptionFieldsService(mockSubscriptionFieldsIdRepository, mockUuidCreator)
+  private val service = new SubscriptionFieldsService(mockSubscriptionFieldsIdRepository, mockUuidCreator)
 
   private val SomeOtherFields = Map("f3" -> "v3", "f2" -> "v2b")
 
