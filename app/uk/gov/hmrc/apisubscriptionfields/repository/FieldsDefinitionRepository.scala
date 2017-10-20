@@ -21,7 +21,6 @@ import javax.inject.{Inject, Singleton}
 import com.google.inject.ImplementedBy
 import play.api.Logger
 import play.api.libs.json._
-import reactivemongo.api.commands.WriteResult
 import reactivemongo.api.indexes.IndexType
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.apisubscriptionfields.model.FieldsDefinitionIdentifier
@@ -46,7 +45,8 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
   extends ReactiveRepository[FieldsDefinition, BSONObjectID]("fieldsDefinitions", mongoDbProvider.mongo,
     MongoFormatters.FieldsDefinitionJF, ReactiveMongoFormats.objectIdFormats)
   with FieldsDefinitionRepository
-  with MongoIndexCreator {
+  with MongoIndexCreator
+  with MongoErrorHandler {
 
   private implicit val format = MongoFormatters.FieldsDefinitionJF
 
@@ -61,48 +61,29 @@ class FieldsDefinitionMongoRepository @Inject()(mongoDbProvider: MongoDbProvider
   )
 
   override def fetchById(identifier: FieldsDefinitionIdentifier): Future[Option[FieldsDefinition]] = {
-    val selector = Json.obj(
-      "apiContext" -> identifier.apiContext.value,
-      "apiVersion" -> identifier.apiVersion.value
-    )
+    val selector = selectorForFieldsDefinitionIdentifier(identifier)
     Logger.debug(s"[fetchById] selector: $selector")
     collection.find(selector).one[FieldsDefinition]
   }
 
   override def save(fieldsDefinition: FieldsDefinition): Future[Boolean] = {
-    collection.update(selector = selectorForIdentifier(fieldsDefinition), update = fieldsDefinition, upsert = true).map {
-      updateWriteResult => handleError(updateWriteResult, s"Could not save fields definition fields: $fieldsDefinition", updateWriteResult.upserted.nonEmpty)
+    collection.update(selector = selectorForFieldsDefinition(fieldsDefinition), update = fieldsDefinition, upsert = true).map {
+      updateWriteResult => handleUpsertError(updateWriteResult, s"Could not save fields definition fields: $fieldsDefinition", updateWriteResult.upserted.nonEmpty)
     }
   }
 
-  private def selectorForIdentifier(fd: FieldsDefinition): JsObject = {
-    selectorForIdentifier(fd.apiContext, fd.apiVersion)
+  private def selectorForFieldsDefinitionIdentifier(fdi: FieldsDefinitionIdentifier): JsObject = {
+    selector(fdi.apiContext.value, fdi.apiVersion.value)
   }
 
-  private def selectorForIdentifier(apiContext: String, apiVersion: String): JsObject = {
+  private def selectorForFieldsDefinition(fd: FieldsDefinition): JsObject = {
+    selector(fd.apiContext, fd.apiVersion)
+  }
+
+  private def selector(apiContext: String, apiVersion: String): JsObject = {
     Json.obj(
       "apiContext" -> apiContext,
       "apiVersion" -> apiVersion
     )
   }
-
-  private def handleError(result: WriteResult, exceptionMsg: => String, isInserted: Boolean): Boolean = {
-
-    def databaseAltered(writeResult: WriteResult): Boolean = writeResult.n > 0
-
-    def handleError(result: WriteResult) =
-      if (databaseAltered(result))
-        isInserted
-      else
-        throw new RuntimeException(exceptionMsg)
-
-    result.errmsg.fold(handleError(result)) {
-      errMsg => {
-        val errorMsg = s"""$exceptionMsg. $errMsg"""
-        logger.error(errorMsg)
-        throw new RuntimeException(errorMsg)
-      }
-    }
-  }
-
 }

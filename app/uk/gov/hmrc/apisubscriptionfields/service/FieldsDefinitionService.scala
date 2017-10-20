@@ -42,6 +42,6 @@ class FieldsDefinitionService @Inject() (repository: FieldsDefinitionRepository)
   }
 
   private def asResponse(fieldsDefinition: FieldsDefinition): FieldsDefinitionResponse = {
-    FieldsDefinitionResponse(fields = fieldsDefinition.fields)
+    FieldsDefinitionResponse(fields = fieldsDefinition.fieldDefinitions)
   }
 }

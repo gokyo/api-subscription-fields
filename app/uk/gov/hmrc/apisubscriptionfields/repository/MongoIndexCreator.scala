@@ -38,5 +38,4 @@ trait MongoIndexCreator {
       background = isBackground
     )
   }
-
 }

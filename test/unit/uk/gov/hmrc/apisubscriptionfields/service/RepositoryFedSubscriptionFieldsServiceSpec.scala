@@ -48,8 +48,8 @@ class RepositoryFedSubscriptionFieldsServiceSpec extends UnitSpec with Subscript
       val result = await(service.get(FakeAppId))
 
       result shouldBe Some(BulkSubscriptionFieldsResponse(fields = Seq(
-        SubscriptionFieldsResponse(id = subscriptionFields1.id, fieldsId = SubscriptionFieldsId(subscriptionFields1.fieldsId), fields = subscriptionFields1.customFields),
-        SubscriptionFieldsResponse(id = subscriptionFields2.id, fieldsId = SubscriptionFieldsId(subscriptionFields2.fieldsId), fields = subscriptionFields2.customFields)
+        SubscriptionFieldsResponse(id = subscriptionFields1.id, fieldsId = SubscriptionFieldsId(subscriptionFields1.fieldsId), fields = subscriptionFields1.fields),
+        SubscriptionFieldsResponse(id = subscriptionFields2.id, fieldsId = SubscriptionFieldsId(subscriptionFields2.fieldsId), fields = subscriptionFields2.fields)
       )))
     }
 

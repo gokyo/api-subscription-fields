@@ -83,7 +83,7 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
       val isInsertedAfterInsert = await(repository.save(fieldsDefinition))
       collectionSize shouldBe 1
       isInsertedAfterInsert shouldBe true
-      val edited = fieldsDefinition.copy(fields = Seq.empty)
+      val edited = fieldsDefinition.copy(fieldDefinitions = Seq.empty)
 
       val isInsertedAfterEdit = await(repository.save(edited))
 
@@ -119,7 +119,7 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
       collectionSize shouldBe 1
       isInsertedAfterInsert shouldBe true
 
-      val isInsertedAfterEdit = await(repository.save(fieldsDefinition.copy(fields = Seq(FakeFieldDefinitionUrl))))
+      val isInsertedAfterEdit = await(repository.save(fieldsDefinition.copy(fieldDefinitions = Seq(FakeFieldDefinitionUrl))))
       isInsertedAfterEdit shouldBe false
       collectionSize shouldBe 1
     }
@@ -128,5 +128,4 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
   private def selector(fd: FieldsDefinition) = {
     BSONDocument("apiContext" -> fd.apiContext, "apiVersion" -> fd.apiVersion)
   }
-
 }

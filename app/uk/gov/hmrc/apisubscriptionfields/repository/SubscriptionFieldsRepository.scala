@@ -23,7 +23,6 @@ import com.google.inject.ImplementedBy
 import play.api.Logger
 import play.api.libs.json.{JsObject, _}
 import reactivemongo.api.ReadPreference
-import reactivemongo.api.commands.WriteResult
 import reactivemongo.api.indexes.IndexType
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.apisubscriptionfields.model.SubscriptionIdentifier
@@ -51,7 +50,8 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
   extends ReactiveRepository[SubscriptionFields, BSONObjectID]("subscriptionFields", mongoDbProvider.mongo,
     MongoFormatters.SubscriptionFieldsJF, ReactiveMongoFormats.objectIdFormats)
   with SubscriptionFieldsRepository
-  with MongoIndexCreator {
+  with MongoIndexCreator
+  with MongoErrorHandler {
 
   private implicit val format = MongoFormatters.SubscriptionFieldsJF
 
@@ -121,34 +121,4 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
       writeResult => handleDeleteError(writeResult, s"Could not delete subscription fields for id: $identifier")
     }
   }
-
-  private def handleDeleteError(result: WriteResult, exceptionMsg: => String): Boolean = {
-    handleError(result, databaseAltered, exceptionMsg)
-  }
-
-  private def handleUpsertError(result: WriteResult, exceptionMsg: => String, isInserted: Boolean): Boolean = {
-
-    def handleUpsertError(result: WriteResult) =
-      if (databaseAltered(result))
-        isInserted
-      else
-        throw new RuntimeException(exceptionMsg)
-
-    handleError(result, handleUpsertError, exceptionMsg)
-  }
-
-  private def handleError(result: WriteResult, f: WriteResult => Boolean, exceptionMsg: String): Boolean = {
-    result.errmsg.fold(f(result)) {
-      errMsg => {
-        val errorMsg = s"""$exceptionMsg. $errMsg"""
-        logger.error(errorMsg)
-        throw new RuntimeException(errorMsg)
-      }
-    }
-  }
-
-  private def databaseAltered(writeResult: WriteResult): Boolean = writeResult.n > 0
-
-  private def selectorById(id: String) = Json.obj("id" -> id)
-
 }

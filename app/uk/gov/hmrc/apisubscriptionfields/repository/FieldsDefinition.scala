@@ -23,4 +23,4 @@ object FieldsDefinition {
     new FieldsDefinition(id.apiContext.value, id.apiVersion.value, fields)
 }
 
-case class FieldsDefinition(apiContext: String, apiVersion: String, fields: Seq[FieldDefinition])
+case class FieldsDefinition(apiContext: String, apiVersion: String, fieldDefinitions: Seq[FieldDefinition])
