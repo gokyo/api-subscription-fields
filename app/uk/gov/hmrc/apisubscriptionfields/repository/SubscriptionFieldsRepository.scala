@@ -22,7 +22,7 @@ import javax.inject.{Inject, Singleton}
 import com.google.inject.ImplementedBy
 import play.api.Logger
 import play.api.libs.json.{JsObject, _}
-import reactivemongo.api.ReadPreference
+import reactivemongo.api.{Cursor, ReadPreference}
 import reactivemongo.api.indexes.IndexType
 import reactivemongo.bson.BSONObjectID
 import reactivemongo.play.json.ImplicitBSONHandlers._
@@ -84,7 +84,7 @@ class SubscriptionFieldsMongoRepository @Inject()(mongoDbProvider: MongoDbProvid
   override def fetchByApplicationId(applicationId: String): Future[List[SubscriptionFields]] = {
     val selector = Json.obj("applicationId" -> applicationId)
     Logger.debug(s"[fetchByApplicationId] selector: $selector")
-    collection.find(selector).cursor[SubscriptionFields](ReadPreference.primary).collect[List]()
+    collection.find(selector).cursor[SubscriptionFields](ReadPreference.primary).collect[List](Int.MaxValue, Cursor.FailOnError[List[SubscriptionFields]]())
   }
 
   override def fetchById(identifier: SubscriptionIdentifier): Future[Option[SubscriptionFields]] = {
