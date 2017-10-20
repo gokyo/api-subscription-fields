@@ -36,7 +36,7 @@ trait MongoErrorHandler {
     handleError(result, handleUpsertError, exceptionMsg)
   }
 
-  def handleError(result: WriteResult, f: WriteResult => Boolean, exceptionMsg: String): Boolean = {
+  private def handleError(result: WriteResult, f: WriteResult => Boolean, exceptionMsg: String): Boolean = {
     result.writeConcernError.fold(f(result)) {
       errMsg => {
         val errorMsg = s"""$exceptionMsg. $errMsg"""
@@ -46,5 +46,5 @@ trait MongoErrorHandler {
     }
   }
 
-  def databaseAltered(writeResult: WriteResult): Boolean = writeResult.n > 0
+  private def databaseAltered(writeResult: WriteResult): Boolean = writeResult.n > 0
 }
