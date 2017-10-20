@@ -70,7 +70,6 @@ class RepositoryFedSubscriptionFieldsService @Inject()(repository: SubscriptionF
   }
 
   override def delete(identifier: SubscriptionIdentifier): Future[Boolean] = {
-    val id = identifier.encode()
     Logger.debug(s"[delete] SubscriptionIdentifier: $identifier")
     repository.delete(identifier)
   }
@@ -102,12 +101,12 @@ class RepositoryFedSubscriptionFieldsService @Inject()(repository: SubscriptionF
   private def save(apiSubscription: SubscriptionFields): Future[SubscriptionFieldsResponse] = {
     Logger.debug(s"[save] SubscriptionFields: $apiSubscription")
     repository.save(apiSubscription) map {
-      _ => SubscriptionFieldsResponse(apiSubscription.id, SubscriptionFieldsId(apiSubscription.fieldsId), apiSubscription.fields)
+      _ => SubscriptionFieldsResponse(id = "TODO: remove this field", fieldsId = SubscriptionFieldsId(apiSubscription.fieldsId), fields = apiSubscription.fields)
     }
   }
 
   private def asResponse(apiSubscription: SubscriptionFields): SubscriptionFieldsResponse = {
-    SubscriptionFieldsResponse(id = apiSubscription.id, fieldsId = SubscriptionFieldsId(apiSubscription.fieldsId), fields = apiSubscription.fields)
+    SubscriptionFieldsResponse(id = "TODO: remove this field", fieldsId = SubscriptionFieldsId(apiSubscription.fieldsId), fields = apiSubscription.fields)
   }
 
 }

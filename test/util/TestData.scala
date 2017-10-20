@@ -43,7 +43,7 @@ trait SubscriptionFieldsTestData extends TestData {
   final val FakeAppId2 = AppId(fakeRawAppId2)
   final val FakeSubscriptionIdentifier = SubscriptionIdentifier(FakeAppId, ApiContext(fakeRawContext), ApiVersion(fakeRawVersion))
   final val FakeSubscriptionIdentifier2 = SubscriptionIdentifier(FakeAppId2, ApiContext(fakeRawContext), ApiVersion(fakeRawVersion))
-  final val FakeRawIdentifier: String = FakeSubscriptionIdentifier.encode()
+  final val FakeRawIdentifier: String = "TODO: remove this field"
 
   final val FakeRawFieldsId = UUID.randomUUID()
   final val FakeFieldsId = SubscriptionFieldsId(FakeRawFieldsId)
@@ -51,13 +51,13 @@ trait SubscriptionFieldsTestData extends TestData {
   final val EmptyResponse: Future[Option[SubscriptionFieldsResponse]] = Future.successful(None)
   final val CustomFields = Map("A" -> "X", "B" -> "Y")
 
-  final val FakeApiSubscription = SubscriptionFields(FakeRawIdentifier, fakeRawAppId, fakeRawContext, fakeRawVersion, FakeRawFieldsId, CustomFields)
+  final val FakeApiSubscription = SubscriptionFields(fakeRawAppId, fakeRawContext, fakeRawVersion, FakeRawFieldsId, CustomFields)
   final val FakeSubscriptionFieldsId = SubscriptionFieldsId(FakeRawFieldsId)
   final val FakeSubscriptionFieldsResponse: SubscriptionFieldsResponse = SubscriptionFieldsResponse(FakeRawIdentifier, FakeSubscriptionFieldsId, CustomFields)
 
   def createSubscriptionFieldsWithApiContext(applicationId: String = fakeRawAppId, rawContext: String = fakeRawContext) = {
     val customFields = Map("field_1" -> "value_1", "field_2" -> "value_2", "field_3" -> "value_3")
-    SubscriptionFields(FakeSubscriptionIdentifier.copy(applicationId = AppId(applicationId), apiContext = ApiContext(rawContext)).encode(), applicationId, rawContext, fakeRawVersion,  UUID.randomUUID(), customFields)
+    SubscriptionFields(applicationId, rawContext, fakeRawVersion,  UUID.randomUUID(), customFields)
   }
 
   def subscriptionIdentifier(apiSubscription: SubscriptionFields) = SubscriptionIdentifier(AppId(apiSubscription.applicationId), ApiContext(apiSubscription.apiContext), ApiVersion(apiSubscription.apiVersion))

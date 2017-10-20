@@ -64,7 +64,7 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
 
   private def createApiSubscription(applicationId: String = fakeRawAppId): SubscriptionFields = {
     val customFields = Map("field_1" -> "value_1", "field_2" -> "value_2", "field_3" -> "value_3")
-    SubscriptionFields(s"${UUID.randomUUID().toString}-WhoCaresSoLongAsItsFixed", applicationId, fakeRawContext, fakeRawVersion, UUID.randomUUID(), customFields)
+    SubscriptionFields(applicationId, fakeRawContext, fakeRawVersion, UUID.randomUUID(), customFields)
   }
 
   private def collectionSize: Int = {
