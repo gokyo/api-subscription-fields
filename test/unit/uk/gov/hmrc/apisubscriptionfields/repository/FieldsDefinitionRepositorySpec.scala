@@ -16,8 +16,6 @@
 
 package unit.uk.gov.hmrc.apisubscriptionfields.repository
 
-import java.util.UUID
-
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import reactivemongo.api.DB
@@ -71,14 +69,15 @@ class FieldsDefinitionRepositorySpec extends UnitSpec
       val isInsertedAfterInsert = await(repository.save(fieldsDefinition))
       collectionSize shouldBe 1
 
-      import reactivemongo.json._
+      import reactivemongo.play.json._
 
       isInsertedAfterInsert shouldBe true
       await(repository.collection.find(selector(fieldsDefinition)).one[FieldsDefinition]) shouldBe Some(fieldsDefinition)
     }
 
     "update the record in the collection" in new Setup {
-      import reactivemongo.json._
+      import reactivemongo.play.json._
+
       collectionSize shouldBe 0
       val isInsertedAfterInsert = await(repository.save(fieldsDefinition))
       collectionSize shouldBe 1

@@ -25,6 +25,7 @@ import play.api.libs.json.{JsObject, _}
 import reactivemongo.api.ReadPreference
 import reactivemongo.api.indexes.IndexType
 import reactivemongo.bson.BSONObjectID
+import reactivemongo.play.json.ImplicitBSONHandlers._
 import uk.gov.hmrc.apisubscriptionfields.model.SubscriptionIdentifier
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats

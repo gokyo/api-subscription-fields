@@ -37,7 +37,7 @@ trait MongoErrorHandler {
   }
 
   def handleError(result: WriteResult, f: WriteResult => Boolean, exceptionMsg: String): Boolean = {
-    result.errmsg.fold(f(result)) {
+    result.writeConcernError.fold(f(result)) {
       errMsg => {
         val errorMsg = s"""$exceptionMsg. $errMsg"""
         Logger.error(errorMsg)

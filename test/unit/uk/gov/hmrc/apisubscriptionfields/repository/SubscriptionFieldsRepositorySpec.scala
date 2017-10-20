@@ -79,7 +79,7 @@ class SubscriptionFieldsRepositorySpec extends UnitSpec
       collectionSize shouldBe 1
       isInserted shouldBe true
 
-      import reactivemongo.json._
+      import reactivemongo.play.json._
 
       await(repository.collection.find(selector(apiSubscription)).one[SubscriptionFields]) shouldBe Some(apiSubscription)
     }
