@@ -23,7 +23,7 @@ import uk.gov.hmrc.apisubscriptionfields.service.{SubscriptionFieldsService, UUI
 import uk.gov.hmrc.play.test.UnitSpec
 import util.SubscriptionFieldsTestData
 
-class RepositoryFedSubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTestData with MockFactory {
+class SubscriptionFieldsServiceSpec extends UnitSpec with SubscriptionFieldsTestData with MockFactory {
 
   private val mockSubscriptionFieldsIdRepository = mock[SubscriptionFieldsRepository]
   private val mockUuidCreator = mock[UUIDCreator]
